@@ -1,7 +1,6 @@
 package com.scb.sso.singleuibff.service.v2;
 
 import com.scb.sso.singleuibff.config.EMS3ConfigProperties;
-import com.scb.sso.singleuibff.entity.AuthorizationApplication;
 import com.scb.sso.singleuibff.service.v2.implementation.EMS3AuthorizationImplementation;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -44,20 +43,123 @@ class EMS3AuthorizationImplementationTest {
         """;
 
     @Test
+    void acceptsRegistrationNameAndIdWithoutStoredUidOrDuplicateItamAndReturnsNativeGrants() throws Exception {
+        try (var server = new Ems3Server()) {
+            var app = ratan();
+            var result = new EMS3AuthorizationImplementation(server.config()).getEntitlements("test-user", List.of(app));
+            var entity = result.getEntities().get(0);
+            assertEquals(10L, entity.getId());
+            assertEquals("RATAN_ENTITLEMENT_RULE", entity.getName());
+            assertEquals("RATAN_ENTITLEMENT_RULE", entity.getApplicationName());
+            assertEquals("RATAN_TRADE_BLOTTER", entity.getSubjects().get(0).getName());
+            assertEquals("RATAN_TRADE_BLOTTER", entity.getSubjects().get(0).getLongName());
+        }
+    }
+
+    @Test
+    void returnsRatanAndFlowzeroSeparatelyUnderOneParentRegistrationWithoutExtraRequests() throws Exception {
+        try (var server = new Ems3Server()) {
+            ArrayNode detail = (ArrayNode) JSON.readTree(DETAIL);
+            detail.add(JSON.readTree("""
+                {"entitlementId":"329","entitlementName":"Global_Onboard_Ops","appId":"51358",
+                 "appName":"FLOWZERO","appUID":65,"featureActionDtos":[
+                  {"features":{"featureId":248,"featureName":"RAISE_REQUEST",
+                     "applicationDto":{"appName":"FLOWZERO","appUID":65}},
+                   "actions":{"actionId":260,"actionName":"RAISE_NEW_REQUEST",
+                     "applicationDto":{"appName":"FLOWZERO","appUID":65}}}]}
+                """));
+            ArrayNode aggregate = (ArrayNode) JSON.readTree(AGGREGATE);
+            aggregate.add(JSON.readTree("""
+                {"user_data":{"app_name":"FLOWZERO","itam_id":"51358","user_id":"test-user"},
+                 "entitlements":{"entitlement_name":["Global_Onboard_Ops"],
+                   "role_entitlements":[{"feature":"RAISE_REQUEST","action":"RAISE_NEW_REQUEST"}],
+                   "data_entitlements":[{"key":"COUNTRY","values":["SG"]}]}}
+                """));
+            server.bodies.put("detail", detail.toString());
+            server.bodies.put("aggregate", aggregate.toString());
+            var result = new EMS3AuthorizationImplementation(server.config()).getEntitlements("test-user",
+                List.of(ratan(), new Ems3Application("51358", "FLOWZERO")));
+            assertEquals(List.of("RATAN_ENTITLEMENT_RULE", "FLOWZERO"),
+                result.getEntities().stream().map(e -> e.getName()).toList());
+            assertEquals(List.of(10L, 65L), result.getEntities().stream().map(e -> e.getId()).toList());
+            var flowzero = result.getEntities().get(1);
+            assertEquals("Global_Onboard_Ops", flowzero.getRoleName());
+            assertEquals(List.of("RAISE_REQUEST"), flowzero.getSubjects().stream().map(s -> s.getName()).toList());
+            assertEquals(List.of("RAISE_NEW_REQUEST"), flowzero.getSubjects().get(0).getActions().stream().map(a -> a.getName()).toList());
+            assertEquals(3, server.requests);
+        }
+    }
+
+    @Test
+    void repeatedTileApplicationSelectionsReturnOneGrantSet() throws Exception {
+        try (var server = new Ems3Server()) {
+            var result = new EMS3AuthorizationImplementation(server.config()).getEntitlements("test-user",
+                List.of(ratan(), ratan(), ratan()));
+            assertEquals(1, result.getEntities().size());
+            assertEquals(1, result.getEntities().get(0).getSubjects().get(0).getActions().size());
+            assertEquals(3, server.requests);
+        }
+    }
+
+    @Test
+    void rejectsDifferentParentUidsAcrossRolesEvenWhenEachNestedApplicationMatchesItsParent() throws Exception {
+        try (var server = new Ems3Server()) {
+            ArrayNode detail = (ArrayNode) JSON.readTree(DETAIL);
+            ObjectNode second = detail.get(0).deepCopy();
+            second.put("entitlementId", "201").put("entitlementName", "FMO_KR_OPS").put("appUID", 99);
+            ((ObjectNode) second.at("/featureActionDtos/0/features/applicationDto")).put("appUID", 99);
+            ((ObjectNode) second.at("/featureActionDtos/0/actions/applicationDto")).put("appUID", 99);
+            detail.add(second);
+            ArrayNode aggregate = (ArrayNode) JSON.readTree(AGGREGATE);
+            ((ArrayNode) aggregate.at("/0/entitlements/entitlement_name")).add("FMO_KR_OPS");
+            server.bodies.put("detail", detail.toString());
+            server.bodies.put("aggregate", aggregate.toString());
+            assertThrows(AuthorizationUnavailableException.class,
+                () -> new EMS3AuthorizationImplementation(server.config()).getEntitlements("test-user", List.of(ratan())));
+        }
+    }
+
+    @Test
+    void validatesAllFeaturesAndKeepsEachRolesActionsInsteadOfCopyingAggregateUnion() throws Exception {
+        try (var server = new Ems3Server()) {
+            ArrayNode detail = (ArrayNode) JSON.readTree(DETAIL);
+            ObjectNode second = detail.get(0).deepCopy();
+            second.put("entitlementId", "201").put("entitlementName", "FMO_KR_OPS");
+            ((ObjectNode) second.at("/featureActionDtos/0/actions")).put("actionId", 194).put("actionName", "EXPORT");
+            detail.add(second);
+            ArrayNode aggregate = (ArrayNode) JSON.readTree(AGGREGATE);
+            ((ArrayNode) aggregate.at("/0/entitlements/entitlement_name")).add("FMO_KR_OPS");
+            ((ArrayNode) aggregate.at("/0/entitlements/role_entitlements")).addObject()
+                .put("feature", "RATAN_TRADE_BLOTTER").put("action", "EXPORT");
+            server.bodies.put("detail", detail.toString());
+            server.bodies.put("aggregate", aggregate.toString());
+            var adapter = new EMS3AuthorizationImplementation(server.config());
+            var result = adapter.getEntitlements("test-user", List.of(ratan()));
+            assertEquals(List.of("ACCESS_FMO_POST_TRADE_PORTAL"),
+                result.getEntities().get(0).getSubjects().get(0).getActions().stream().map(a -> a.getName()).toList());
+            assertEquals(List.of("EXPORT"),
+                result.getEntities().get(1).getSubjects().get(0).getActions().stream().map(a -> a.getName()).toList());
+            ((ObjectNode) aggregate.at("/0/entitlements/role_entitlements/1")).put("feature", "UNREGISTERED_FEATURE");
+            server.bodies.put("aggregate", aggregate.toString());
+            assertThrows(AuthorizationUnavailableException.class, () -> adapter.getEntitlements("test-user", List.of(ratan())));
+        }
+    }
+
+    @Test
     void returnsSelectedApplicationWithItsRoleAndLegacySubjectPath() throws Exception {
         try (var server = new Ems3Server()) {
             var result = new EMS3AuthorizationImplementation(server.config()).getEntitlements("test-user", List.of(ratan()));
             assertEquals(1, result.getEntities().size());
             var entity = result.getEntities().get(0);
-            assertEquals(7L, entity.getId());
-            assertEquals("X_RATANONE", entity.getName());
+            assertEquals(10L, entity.getId());
+            assertEquals("RATAN_ENTITLEMENT_RULE", entity.getName());
             assertEquals("RATAN_ENTITLEMENT_RULE", entity.getApplicationName());
             assertEquals(199L, entity.getRoleId());
             assertEquals("FMO_COO_SUP", entity.getRoleName());
             var subject = entity.getSubjects().get(0);
             assertEquals(172L, subject.getId());
             assertEquals("RATAN_TRADE_BLOTTER", subject.getName());
-            assertEquals("/RATAN_TRADE_BLOTTER", subject.getLongName());
+            assertEquals("RATAN_TRADE_BLOTTER", subject.getLongName());
             var action = subject.getActions().get(0);
             assertEquals(193L, action.getId());
             assertEquals("ACCESS_FMO_POST_TRADE_PORTAL", action.getName());
@@ -87,7 +189,7 @@ class EMS3AuthorizationImplementationTest {
             server.bodies.put("detail", detail.toString());
             server.bodies.put("aggregate", aggregate.toString());
             var result = new EMS3AuthorizationImplementation(server.config()).getEntitlements("test-user", List.of(ratan()));
-            assertEquals(List.of("X_RATANONE"), result.getEntities().stream().map(e -> e.getName()).toList());
+            assertEquals(List.of("RATAN_ENTITLEMENT_RULE"), result.getEntities().stream().map(e -> e.getName()).toList());
         }
     }
 
@@ -203,10 +305,8 @@ class EMS3AuthorizationImplementationTest {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("invalidMappings")
-    void rejectsInvalidSelectedMappingBeforeCallingEms3(String name, Consumer<AuthorizationApplication> mutate) throws Exception {
+    void rejectsInvalidSelectedMappingBeforeCallingEms3(String name, Ems3Application app) throws Exception {
         try (var server = new Ems3Server()) {
-            var app = ratan();
-            mutate.accept(app);
             assertThrows(AuthorizationUnavailableException.class,
                 () -> new EMS3AuthorizationImplementation(server.config()).getEntitlements("test-user", List.of(app)));
             assertEquals(0, server.requests);
@@ -215,22 +315,14 @@ class EMS3AuthorizationImplementationTest {
 
     private static Stream<Arguments> invalidMappings() {
         return Stream.of(
-            mapping("missing BFF entity", a -> a.setBffEntityName(null)),
-            mapping("blank BFF entity", a -> a.setBffEntityName(" ")),
-            mapping("missing BFF ID", a -> a.setBffEntityId(null)),
-            mapping("zero BFF ID", a -> a.setBffEntityId(0L)),
-            mapping("missing EMS3 app name", a -> a.setEms3AppName(null)),
-            mapping("missing EMS3 app ID", a -> a.setEms3AppId(null)),
-            mapping("missing EMS3 app UID", a -> a.setEms3AppUid(null)),
-            mapping("zero EMS3 app UID", a -> a.setEms3AppUid(0L)),
-            mapping("missing EMS3 ITAM ID", a -> a.setEms3ItamId(null)),
-            mapping("missing legacy subject map", a -> a.setSubjectLongNames(null)),
-            mapping("blank legacy subject name", a -> a.setSubjectLongNames(Map.of(" ", "/x"))),
-            mapping("blank legacy subject path", a -> a.setSubjectLongNames(Map.of("x", " ")))
+            mapping("missing EMS3 app name", new Ems3Application("51358", null)),
+            mapping("blank EMS3 app name", new Ems3Application("51358", " ")),
+            mapping("missing EMS3 app ID", new Ems3Application(null, "RATAN_ENTITLEMENT_RULE")),
+            mapping("blank EMS3 app ID", new Ems3Application(" ", "RATAN_ENTITLEMENT_RULE"))
         );
     }
 
-    private static Arguments mapping(String name, Consumer<AuthorizationApplication> mutate) { return Arguments.of(name, mutate); }
+    private static Arguments mapping(String name, Ems3Application application) { return Arguments.of(name, application); }
 
     @Test
     void rejectsInvalidIdentityScopeAndDuplicateMappingsBeforeRequests() throws Exception {
@@ -241,16 +333,9 @@ class EMS3AuthorizationImplementationTest {
             }
             assertThrows(AuthorizationUnavailableException.class, () -> adapter.getEntitlements("test-user", null));
             assertThrows(AuthorizationUnavailableException.class, () -> adapter.getEntitlements("test-user", List.of()));
-            assertThrows(AuthorizationUnavailableException.class, () -> adapter.getEntitlements("test-user", java.util.Arrays.asList((AuthorizationApplication) null)));
+            assertThrows(AuthorizationUnavailableException.class, () -> adapter.getEntitlements("test-user", java.util.Arrays.asList((Ems3Application) null)));
             assertThrows(AuthorizationUnavailableException.class, () -> new EMS3AuthorizationImplementation(null).getEntitlements("test-user", List.of(ratan())));
-            assertThrows(AuthorizationUnavailableException.class, () -> adapter.getEntitlements("test-user", List.of(ratan(), ratan())));
-            var sameUid = ratan();
-            sameUid.setBffEntityName("SECOND");
-            sameUid.setEms3AppName("SECOND_APP");
-            assertThrows(AuthorizationUnavailableException.class, () -> adapter.getEntitlements("test-user", List.of(ratan(), sameUid)));
-            var sameName = ratan();
-            sameName.setBffEntityName("SECOND");
-            sameName.setEms3AppUid(65L);
+            var sameName = new Ems3Application("ANOTHER_PARENT", "RATAN_ENTITLEMENT_RULE");
             assertThrows(AuthorizationUnavailableException.class, () -> adapter.getEntitlements("test-user", List.of(ratan(), sameName)));
             assertEquals(0, server.requests);
         }
@@ -270,7 +355,6 @@ class EMS3AuthorizationImplementationTest {
     void usesFeatureNameAsLongNameWhenThereIsNoLegacyPath() throws Exception {
         try (var server = new Ems3Server()) {
             var app = ratan();
-            app.setSubjectLongNames(Map.of());
             var result = new EMS3AuthorizationImplementation(server.config()).getEntitlements("test-user", List.of(app));
             assertEquals("RATAN_TRADE_BLOTTER", result.getEntities().get(0).getSubjects().get(0).getLongName());
         }
@@ -492,11 +576,7 @@ class EMS3AuthorizationImplementationTest {
     @Test
     void rejectsPartialSuccessWhenAnotherSelectedApplicationIsMissing() throws Exception {
         try (var server = new Ems3Server()) {
-            var other = ratan();
-            other.setBffEntityName("FMO PORTAL ADMIN");
-            other.setBffEntityId(8L);
-            other.setEms3AppName("FMO_PORTAL_ADMIN");
-            other.setEms3AppUid(11L);
+            var other = new Ems3Application("51358", "FMO_PORTAL_ADMIN");
             assertThrows(AuthorizationUnavailableException.class,
                 () -> new EMS3AuthorizationImplementation(server.config()).getEntitlements("test-user", List.of(ratan(), other)));
             ArrayNode aggregate = (ArrayNode) JSON.readTree(AGGREGATE);
@@ -505,7 +585,7 @@ class EMS3AuthorizationImplementationTest {
             aggregate.add(emptyAdmin);
             server.bodies.put("aggregate", aggregate.toString());
             var result = new EMS3AuthorizationImplementation(server.config()).getEntitlements("test-user", List.of(ratan(), other));
-            assertEquals(List.of("X_RATANONE"), result.getEntities().stream().map(e -> e.getName()).toList());
+            assertEquals(List.of("RATAN_ENTITLEMENT_RULE"), result.getEntities().stream().map(e -> e.getName()).toList());
         }
     }
 
@@ -551,16 +631,8 @@ class EMS3AuthorizationImplementationTest {
         return cases.stream();
     }
 
-    private static AuthorizationApplication ratan() {
-        var app = new AuthorizationApplication();
-        app.setBffEntityName("X_RATANONE");
-        app.setBffEntityId(7L);
-        app.setEms3AppName("RATAN_ENTITLEMENT_RULE");
-        app.setEms3AppId("51358");
-        app.setEms3AppUid(10L);
-        app.setEms3ItamId("51358");
-        app.setSubjectLongNames(Map.of("RATAN_TRADE_BLOTTER", "/RATAN_TRADE_BLOTTER"));
-        return app;
+    private static Ems3Application ratan() {
+        return new Ems3Application("51358", "RATAN_ENTITLEMENT_RULE");
     }
 
     private static final class Ems3Server implements AutoCloseable {

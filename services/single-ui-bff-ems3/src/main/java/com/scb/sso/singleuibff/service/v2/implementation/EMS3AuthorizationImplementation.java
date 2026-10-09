@@ -9,8 +9,8 @@ import com.scb.sso.singleuibff.dto.ems2.v2.Action;
 import com.scb.sso.singleuibff.dto.ems2.v2.Ems2Result;
 import com.scb.sso.singleuibff.dto.ems2.v2.Entity;
 import com.scb.sso.singleuibff.dto.ems2.v2.Subject;
-import com.scb.sso.singleuibff.entity.AuthorizationApplication;
 import com.scb.sso.singleuibff.service.v2.AuthorizationUnavailableException;
+import com.scb.sso.singleuibff.service.v2.Ems3Application;
 import com.scb.sso.singleuibff.service.v2.MappedAuthorizationProvider;
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -50,7 +50,7 @@ public final class EMS3AuthorizationImplementation implements MappedAuthorizatio
     }
 
     @Override
-    public Ems2Result getEntitlements(String userId, List<AuthorizationApplication> applications) {
+    public Ems2Result getEntitlements(String userId, List<Ems3Application> applications) {
         try {
             require(userId != null && !userId.isBlank() && userId.length() <= 255
                 && userId.chars().noneMatch(Character::isISOControl), "Invalid user identity");
@@ -163,45 +163,42 @@ public final class EMS3AuthorizationImplementation implements MappedAuthorizatio
         }
     }
 
-    private static Map<String, ApplicationGrants> selectedApplications(List<AuthorizationApplication> applications) {
+    private static Map<String, ApplicationGrants> selectedApplications(List<Ems3Application> applications) {
         Map<String, ApplicationGrants> selected = new LinkedHashMap<>();
-        Set<String> entities = new HashSet<>();
-        Set<Long> uids = new HashSet<>();
         for (var app : applications) {
-            require(app != null && nonblank(app.getBffEntityName()) && positiveId(app.getBffEntityId())
-                && nonblank(app.getEms3AppName()) && nonblank(app.getEms3AppId())
-                && positiveId(app.getEms3AppUid()) && nonblank(app.getEms3ItamId()), "Invalid EMS3 application mapping");
-            require(entities.add(app.getBffEntityName()) && uids.add(app.getEms3AppUid())
-                && !selected.containsKey(app.getEms3AppName()), "Duplicate EMS3 application mapping");
-            Map<String, String> longNames = app.getSubjectLongNames();
-            require(longNames != null && longNames.entrySet().stream()
-                .allMatch(entry -> nonblank(entry.getKey()) && nonblank(entry.getValue())), "Invalid subject path mapping");
-            selected.put(app.getEms3AppName(), new ApplicationGrants(app.getBffEntityName(), app.getBffEntityId(),
-                app.getEms3AppName(), app.getEms3AppId(), app.getEms3AppUid(), app.getEms3ItamId(), Map.copyOf(longNames)));
+            require(app != null && nonblank(app.appName()) && nonblank(app.appId()), "Invalid EMS3 application mapping");
+            ApplicationGrants existing = selected.get(app.appName());
+            require(existing == null || existing.appId.equals(app.appId()), "Conflicting EMS3 application mapping");
+            selected.computeIfAbsent(app.appName(), ignored -> new ApplicationGrants(app.appName(), app.appId()));
         }
         return selected;
     }
 
     private static List<Entity> map(JsonNode detail, JsonNode aggregate, Map<String, ApplicationGrants> selected, String user) {
+        Map<Long, String> applicationNames = new LinkedHashMap<>();
         for (JsonNode row : array(detail)) {
             String appName = text(row, "appName");
+            JsonNode uid = row.get("appUID");
+            if (uid != null && uid.isIntegralNumber() && uid.canConvertToLong() && uid.asLong() > 0) {
+                String previousName = applicationNames.putIfAbsent(uid.asLong(), appName);
+                require(previousName == null || previousName.equals(appName), "Conflicting returned application identity");
+            }
             ApplicationGrants app = selected.get(appName);
             if (app == null) {
-                JsonNode uid = row.get("appUID");
-                require(uid == null || !uid.isIntegralNumber()
-                    || selected.values().stream().noneMatch(expected -> uid.asLong() == expected.appUid), "Wrong selected application name");
                 continue;
             }
-            require(text(row, "appId").equals(app.appId) && positive(row, "appUID") == app.appUid,
-                "Wrong selected application identity");
+            require(text(row, "appId").equals(app.appId), "Wrong selected application identity");
+            long parentUid = positive(row, "appUID");
+            require(app.appUid == 0 || app.appUid == parentUid, "Inconsistent selected application identity");
+            app.appUid = parentUid;
             JsonNode itam = row.get("itamId");
-            require(itam == null || itam.isNull() || (itam.isTextual() && itam.asText().equals(app.itamId)), "Wrong selected ITAM identity");
+            require(itam == null || itam.isNull() || (itam.isTextual() && itam.asText().equals(app.appId)), "Wrong selected ITAM identity");
             String roleName = text(row, "entitlementName");
             long roleId = numericText(row, "entitlementId");
             require(app.roleNames.add(roleName) && app.roleIds.add(roleId), "Duplicate application role");
             var entity = new Entity();
-            entity.setId(app.entityId);
-            entity.setName(app.entityName);
+            entity.setId(parentUid);
+            entity.setName(app.appName);
             entity.setApplicationName(app.appName);
             entity.setRoleName(roleName);
             entity.setRoleId(roleId);
@@ -225,7 +222,7 @@ public final class EMS3AuthorizationImplementation implements MappedAuthorizatio
                     var created = new Subject();
                     created.setId(featureId);
                     created.setName(name);
-                    created.setLongName(app.longNames.getOrDefault(name, name));
+                    created.setLongName(name);
                     created.setActions(new ArrayList<>());
                     return created;
                 });
@@ -246,7 +243,7 @@ public final class EMS3AuthorizationImplementation implements MappedAuthorizatio
                 continue;
             }
             require(seen.add(appName), "Duplicate selected aggregate application");
-            require(text(userData, "itam_id").equals(app.itamId) && text(userData, "user_id").equals(user),
+            require(text(userData, "itam_id").equals(app.appId) && text(userData, "user_id").equals(user),
                 "Wrong aggregate user or application identity");
             JsonNode entitlements = object(row, "entitlements");
             Set<String> roles = new HashSet<>();
@@ -302,7 +299,6 @@ public final class EMS3AuthorizationImplementation implements MappedAuthorizatio
     }
 
     private static boolean nonblank(String value) { return value != null && !value.isBlank(); }
-    private static boolean positiveId(Long value) { return value != null && value > 0; }
     private static boolean positiveDuration(Duration value) {
         return value != null && !value.isZero() && !value.isNegative() && value.compareTo(Duration.ofMinutes(1)) <= 0;
     }
@@ -334,13 +330,9 @@ public final class EMS3AuthorizationImplementation implements MappedAuthorizatio
     }
 
     private static final class ApplicationGrants {
-        private final String entityName;
-        private final long entityId;
         private final String appName;
         private final String appId;
-        private final long appUid;
-        private final String itamId;
-        private final Map<String, String> longNames;
+        private long appUid;
         private final Set<String> roleNames = new LinkedHashSet<>();
         private final Set<Long> roleIds = new HashSet<>();
         private final Set<Pair> pairs = new LinkedHashSet<>();
@@ -348,15 +340,9 @@ public final class EMS3AuthorizationImplementation implements MappedAuthorizatio
         private final Identities featureIdentities = new Identities();
         private final Identities actionIdentities = new Identities();
 
-        private ApplicationGrants(String entityName, long entityId, String appName, String appId, long appUid,
-                                  String itamId, Map<String, String> longNames) {
-            this.entityName = entityName;
-            this.entityId = entityId;
+        private ApplicationGrants(String appName, String appId) {
             this.appName = appName;
             this.appId = appId;
-            this.appUid = appUid;
-            this.itamId = itamId;
-            this.longNames = longNames;
         }
     }
 

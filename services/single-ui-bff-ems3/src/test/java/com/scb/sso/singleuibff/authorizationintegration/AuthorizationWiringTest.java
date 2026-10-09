@@ -4,9 +4,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.scb.sso.singleuibff.config.AuthConfig;
 import com.scb.sso.singleuibff.config.EMS2ConfigProperties;
 import com.scb.sso.singleuibff.config.EMS3ConfigProperties;
-import com.scb.sso.singleuibff.repository.AuthorizationApplicationRepo;
-import com.scb.sso.singleuibff.entity.AuthorizationApplication;
+import com.scb.sso.singleuibff.repository.ApplicationCategoryRepo;
+import com.scb.sso.singleuibff.config.TileEntitlementProperties;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import com.scb.sso.singleuibff.service.v2.implementation.RoutingAuthorizationService;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -29,11 +31,12 @@ class AuthorizationWiringTest {
         ems2.setUserRoles("https://ems2.test/accounts/%s");
         ReflectionTestUtils.setField(config, "ems2ConfigProperties", ems2);
         ReflectionTestUtils.setField(config, "ems3ConfigProperties", new EMS3ConfigProperties());
-        var repository = mock(AuthorizationApplicationRepo.class);
-        var route = new AuthorizationApplication();
-        route.setBffEntityName("X_RATANONE");
-        when(repository.findByBffEntityNameIn(List.of("X_RATANONE"))).thenReturn(List.of(route));
-        ReflectionTestUtils.setField(config, "authorizationApplicationRepo", repository);
+        var repository = mock(ApplicationCategoryRepo.class);
+        when(repository.getAuthorizationTiles()).thenReturn(Optional.of(List.of(Map.of(
+            "application_tile_id", 36L, "ems2_entities", "X_RATANONE", "ems2_subject", "RATAN_CASHFLOW_BLOTTER",
+            "provider", "EMS2", "visible_candidate", true, "is_template", false))));
+        ReflectionTestUtils.setField(config, "applicationCategoryRepo", repository);
+        ReflectionTestUtils.setField(config, "tileEntitlementProperties", new TileEntitlementProperties());
         MockRestServiceServer[] server = new MockRestServiceServer[1];
         var provider = config.buildAuthorizationService(new RestTemplateBuilder()
             .additionalCustomizers(http -> server[0] = MockRestServiceServer.bindTo(http).build()));

@@ -1,0 +1,35 @@
+{
+  "branch": "codex/ems3-single-ui-bff",
+  "verifiedAt": "2026-10-09T03:17:34.235725+00:00",
+  "command": "JAVA_HOME=/opt/homebrew/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home /opt/homebrew/bin/mvn -q clean verify -Dbff.verify.postgres.bin=/opt/homebrew/opt/postgresql@18/bin",
+  "buildDirectory": "services/single-ui-bff-ems3/verification",
+  "tests": {
+    "total": 782,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "coverage": {
+    "scope": "Production authorization adapters, tile router, JWT controller and new configuration validators",
+    "linePercent": 99.89,
+    "branchPercent": 96.83,
+    "minimumPercent": 90
+  },
+  "dumpReplay": {
+    "catalogueRows": 113,
+    "requestedEntities": 1044,
+    "roleProviderCombinations": 40,
+    "individualExportedRoles": 50
+  },
+  "environment": "Synthetic HTTP providers, isolated PostgreSQL and generated JWT signing keys",
+  "remainingLiveChecks": [
+    "CES production registrations and account assignments",
+    "FMAA service-token integration contract",
+    "UAT entitlement equivalence and browser acceptance"
+  ],
+  "excludedFromMinimumDelivery": [
+    "Full untiled-feature mappings",
+    "Large-response/scoped API improvements",
+    "Browser permission refresh after successful renewal"
+  ]
+}

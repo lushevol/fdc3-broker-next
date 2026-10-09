@@ -14,6 +14,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.scb.sso.singleuibff.config.EMS2ConfigProperties;
 import com.scb.sso.singleuibff.config.EMS3ConfigProperties;
 import com.scb.sso.singleuibff.config.JWTConfigProperties;
+import com.scb.sso.singleuibff.config.TileEntitlementProperties;
 import com.scb.sso.singleuibff.controller.v2.JwtAuthenticationController;
 import com.scb.sso.singleuibff.dto.request.RequestOfAuthenticate;
 import com.scb.sso.singleuibff.dto.request.RequestOfAuthenticateEntra;
@@ -21,9 +22,11 @@ import com.scb.sso.singleuibff.dto.request.RequestOfJWT;
 import com.scb.sso.singleuibff.dto.request.RequestOfRelogin;
 import com.scb.sso.singleuibff.dto.response.ResponseOfAuthenticate;
 import com.scb.sso.singleuibff.entity.ApplicationSession;
-import com.scb.sso.singleuibff.entity.AuthorizationApplication;
+import com.scb.sso.singleuibff.entity.ApplicationCategory;
+import com.scb.sso.singleuibff.entity.ApplicationTile;
+import com.scb.sso.singleuibff.entity.ImportMap;
 import com.scb.sso.singleuibff.repository.ApplicationSessionRepo;
-import com.scb.sso.singleuibff.repository.AuthorizationApplicationRepo;
+import com.scb.sso.singleuibff.repository.ApplicationCategoryRepo;
 import com.scb.sso.singleuibff.service.v1.AnalyticService;
 import com.scb.sso.singleuibff.service.v1.ApplicationCategoryService;
 import com.scb.sso.singleuibff.service.v1.implementation.OUDAuthenticationService;
@@ -105,10 +108,14 @@ class DatabaseRoutedAuthorizationIntegrationTest {
             "-o", "-h 127.0.0.1 -p " + port + " -k " + cluster, "-w", "start");
         jdbcUrl = "jdbc:postgresql://127.0.0.1:" + port + "/postgres";
         execute("CREATE SCHEMA " + SCHEMA);
-        execute("CREATE TABLE " + SCHEMA + ".application_tile (ems2_entities text, is_active boolean NOT NULL)");
-        execute("INSERT INTO " + SCHEMA + ".application_tile VALUES (' " + ALPHA + ", " + BETA + " ', true)");
+        execute("CREATE TABLE " + SCHEMA + ".application_category (application_category_id bigint PRIMARY KEY, label text, is_active boolean, order_no bigint)");
+        execute("CREATE TABLE " + SCHEMA + ".import_map (import_map_id bigint PRIMARY KEY, key_name text, is_active boolean)");
+        execute("CREATE TABLE " + SCHEMA + ".application_tile (application_tile_id bigint PRIMARY KEY, application_category_id bigint, import_map_id bigint, ems2_entities text, ems2_subject text, is_active boolean NOT NULL, is_template boolean, module text, tile text, title text, order_no bigint)");
+        execute("CREATE TABLE " + SCHEMA + ".application_tile_audit (application_tile_audit_id bigint, application_tile_id bigint, ems2_entities text, ems2_subject text, is_active boolean, is_template boolean, transaction_mode text, created_at timestamp, updated_at timestamp)");
+        execute("INSERT INTO " + SCHEMA + ".application_category VALUES (1, 'POC', true, 1)");
+        execute("INSERT INTO " + SCHEMA + ".import_map VALUES (1, 'poc_container', true)");
         Path migrations = Files.createDirectory(cluster.resolve("migrations"));
-        for (String name : List.of("V1_0_2__fmo_schema_config.sql", "V1_0_10__authorization_application.sql")) {
+        for (String name : List.of("V1_0_2__fmo_schema_config.sql", "V1_0_10__authorization_application.sql", "V1_0_11__tile_entitlement_provider.sql")) {
             try (var input = DatabaseRoutedAuthorizationIntegrationTest.class.getClassLoader()
                 .getResourceAsStream("db/migration/" + name)) {
                 if (input == null) throw new IOException("Migration resource unavailable: " + name);
@@ -122,10 +129,11 @@ class DatabaseRoutedAuthorizationIntegrationTest {
             .applySetting("hibernate.connection.url", jdbcUrl + "?currentSchema=" + SCHEMA)
             .applySetting("hibernate.connection.username", "bff_integration_test")
             .applySetting("hibernate.connection.password", "")
-            .applySetting("hibernate.hbm2ddl.auto", "validate")
+            .applySetting("hibernate.hbm2ddl.auto", "none")
             .applySetting("hibernate.physical_naming_strategy", "org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy")
             .build();
-        sessionFactory = new MetadataSources(registry).addAnnotatedClass(AuthorizationApplication.class)
+        sessionFactory = new MetadataSources(registry).addAnnotatedClass(ApplicationCategory.class)
+            .addAnnotatedClass(ApplicationTile.class).addAnnotatedClass(ImportMap.class)
             .addAnnotatedClass(ApplicationSession.class).buildMetadata().buildSessionFactory();
         var generator = KeyPairGenerator.getInstance("RSA");
         generator.initialize(2048);
@@ -149,7 +157,13 @@ class DatabaseRoutedAuthorizationIntegrationTest {
 
     @BeforeEach
     void startWithOneLegacyAndOneModernApplication() throws Exception {
-        execute("UPDATE " + SCHEMA + ".authorization_application SET provider = 'EMS2', active = true");
+        execute("DELETE FROM " + SCHEMA + ".application_tile_audit");
+        execute("DELETE FROM " + SCHEMA + ".application_tile");
+        execute("INSERT INTO " + SCHEMA + ".application_tile (application_tile_id, application_category_id, import_map_id, ems2_entities, ems2_subject, is_active, is_template, module, tile, title, order_no) VALUES "
+            + "(1,1,1,'" + ALPHA + "','ALPHA_FEATURE',true,false,'poc','alpha','alpha',1),"
+            + "(2,1,1,'" + BETA + "','BETA_FEATURE',true,false,'poc','beta','beta',2),"
+            + "(3,1,1,'" + ALPHA + "','NO_GRANTED_FEATURE',true,false,'poc','hidden','hidden',3),"
+            + "(4,1,1,'','',true,true,'poc','template','template',4)");
         switchToEms3(BETA, 8, 11);
     }
 
@@ -189,9 +203,9 @@ class DatabaseRoutedAuthorizationIntegrationTest {
             assertEquals(3, fixture.calls("token"));
             assertEquals(3, fixture.calls("detail"));
             assertEquals(3, fixture.calls("aggregate"));
-            var routes = routes().findByBffEntityNameIn(List.of(ALPHA, BETA));
-            assertTrue(routes.stream().allMatch(route -> "EMS3".equals(route.getProvider())));
-            assertTrue(routes.stream().allMatch(route -> route.getMappingVersion() > 0));
+            var routes = routes().getAuthorizationTiles().orElseThrow();
+            assertTrue(routes.stream().filter(row -> !Boolean.TRUE.equals(row.get("is_template")))
+                .allMatch(row -> "EMS3".equals(row.get("provider"))));
         }
     }
 
@@ -212,6 +226,47 @@ class DatabaseRoutedAuthorizationIntegrationTest {
             assertEquals(0, fixture.calls("roles"));
             assertEquals(0, fixture.calls("grants"));
             assertEquals(2, fixture.calls("detail"));
+        }
+    }
+
+    @Test
+    void pendingCesMakerEditDoesNotReplaceThePublishedLegacyFunctionalOwnership() throws Exception {
+        try (var fixture = new ProviderFixture()) {
+            var controller = controller(fixture);
+            assertSuccessful(login(controller, new MockHttpServletResponse()));
+            execute("INSERT INTO " + SCHEMA + ".application_tile_audit (application_tile_audit_id, application_tile_id, ems2_entities, ems2_subject, is_active, is_template, transaction_mode, provider) VALUES "
+                + "(1,1,'" + ALPHA + "','ALPHA_FEATURE',true,false,'checker','EMS2')");
+            execute("UPDATE " + SCHEMA + ".application_tile SET provider='EMS3', ems3_app_id='poc-itam', ems3_app_name='" + ALPHA + "_APP', ems3_subject='ALPHA_FEATURE', is_active=false WHERE application_tile_id=1");
+            execute("INSERT INTO " + SCHEMA + ".application_tile_audit (application_tile_audit_id, application_tile_id, ems2_entities, ems2_subject, is_active, is_template, transaction_mode, provider, ems3_app_id, ems3_app_name, ems3_subject) VALUES "
+                + "(2,1,'" + ALPHA + "','ALPHA_FEATURE',false,false,'maker','EMS3','poc-itam','" + ALPHA + "_APP','ALPHA_FEATURE')");
+            var pending = routes().getAuthorizationTiles().orElseThrow().stream()
+                .filter(row -> ((Number) row.get("application_tile_id")).longValue() == 1).findFirst().orElseThrow();
+            assertEquals("EMS3", pending.get("provider"));
+            assertEquals("EMS2", pending.get("ownership_provider"));
+            assertEquals(false, pending.get("visible_candidate"));
+            var checked = login(controller, new MockHttpServletResponse());
+            assertSuccessful(checked);
+            assertEquals(List.of("beta", "template"), tiles(checked.getBody()));
+            assertEquals(JSON.readTree("[\"ACCESS\"]"), JSON.readTree(entitlementClaims(checked.getBody()))
+                .path(ALPHA + ":TEST_OPERATOR").path("ALPHA_FEATURE"));
+        }
+    }
+
+    @Test
+    void pendingLegacyMakerEditCannotReintroduceThePublishedCesSubjectThroughLegacyGrants() throws Exception {
+        switchToEms3(ALPHA, 7, 10);
+        execute("INSERT INTO " + SCHEMA + ".application_tile (application_tile_id, application_category_id, import_map_id, ems2_entities, ems2_subject, is_active, is_template, module, tile, title, order_no) VALUES "
+            + "(5,1,1,'" + ALPHA + "','',true,false,'poc','entity_only','entity_only',5)");
+        execute("INSERT INTO " + SCHEMA + ".application_tile_audit (application_tile_audit_id, application_tile_id, ems2_entities, ems2_subject, is_active, is_template, transaction_mode, provider, ems3_app_id, ems3_app_name, ems3_subject) VALUES "
+            + "(1,1,'" + ALPHA + "','ALPHA_FEATURE',false,false,'DEACTIVATE','EMS3','poc-itam','" + ALPHA + "_APP','ALPHA_FEATURE')");
+        execute("UPDATE " + SCHEMA + ".application_tile SET provider='EMS2', is_active=false WHERE application_tile_id=1");
+        execute("INSERT INTO " + SCHEMA + ".application_tile_audit (application_tile_audit_id, application_tile_id, ems2_entities, ems2_subject, is_active, is_template, transaction_mode, provider) VALUES "
+            + "(2,1,'" + ALPHA + "','ALPHA_FEATURE',false,false,'MAKER','EMS2')");
+        try (var fixture = new ProviderFixture()) {
+            var checked = login(controller(fixture), new MockHttpServletResponse());
+            assertSuccessful(checked);
+            assertFalse(JSON.readTree(entitlementClaims(checked.getBody())).path(ALPHA + ":TEST_OPERATOR").has("ALPHA_FEATURE"));
+            assertEquals(List.of("beta", "template", "entity_only"), tiles(checked.getBody()));
         }
     }
 
@@ -251,14 +306,20 @@ class DatabaseRoutedAuthorizationIntegrationTest {
     }
 
     @ParameterizedTest
-    @ValueSource(booleans = {false, true})
-    void missingOrInactiveDatabaseMappingBlocksBeforeCallingEitherProvider(boolean inactive) throws Exception {
+    @ValueSource(strings = {"ems3_app_id", "ems3_app_name", "ems3_subject"})
+    void malformedDatabaseMappingBlocksBeforeCallingEitherProvider(String field) throws Exception {
         try (var fixture = new ProviderFixture()) {
             var controller = controller(fixture);
             var initialHttp = new MockHttpServletResponse();
             assertSuccessful(login(controller, initialHttp));
-            execute(inactive ? "UPDATE " + SCHEMA + ".authorization_application SET active = false WHERE bff_entity_name = '" + BETA + "'"
-                : "DELETE FROM " + SCHEMA + ".authorization_application WHERE bff_entity_name = '" + BETA + "'");
+            // Bypass the database constraint to prove runtime validation of a damaged external record.
+            var repository = mock(ApplicationCategoryRepo.class);
+            var damagedRows = new ArrayList<>(routes().getAuthorizationTiles().orElseThrow());
+            var damaged = new HashMap<>(damagedRows.get(1));
+            damaged.put(field, null);
+            damagedRows.set(1, damaged);
+            when(repository.getAuthorizationTiles()).thenReturn(Optional.of(damagedRows));
+            ReflectionTestUtils.setField(controller, "authorizationService", router(fixture, repository));
             int before = fixture.totalCalls();
             var validateHttp = new MockHttpServletResponse();
             assertRejected(controller.checkTokenValidity(jwtRequest(initialHttp), validateHttp), validateHttp);
@@ -275,9 +336,7 @@ class DatabaseRoutedAuthorizationIntegrationTest {
         var legacyConfig = new EMS2ConfigProperties();
         legacyConfig.setUserRoles(fixture.url("roles") + "/%s");
         legacyConfig.setNewUserAuthorizationOnEntity(fixture.url("grants"));
-        var legacy = new EMS2AuthorizationImplementation(new RestTemplate(), JSON, legacyConfig);
-        var router = new RoutingAuthorizationService(factory.getRepository(AuthorizationApplicationRepo.class), legacy,
-            new EMS3AuthorizationImplementation(fixture.modernConfig()));
+        var router = router(fixture, factory.getRepository(ApplicationCategoryRepo.class));
         var categories = mock(ApplicationCategoryService.class);
         when(categories.getDrawers()).thenAnswer(invocation -> Optional.of(drawerRows()));
         var oud = mock(OUDAuthenticationService.class);
@@ -296,9 +355,21 @@ class DatabaseRoutedAuthorizationIntegrationTest {
         return controller;
     }
 
-    private static AuthorizationApplicationRepo routes() {
+    private static ApplicationCategoryRepo routes() {
         return new JpaRepositoryFactory(SharedEntityManagerCreator.createSharedEntityManager(sessionFactory))
-            .getRepository(AuthorizationApplicationRepo.class);
+            .getRepository(ApplicationCategoryRepo.class);
+    }
+
+    private static RoutingAuthorizationService router(ProviderFixture fixture, ApplicationCategoryRepo repository) {
+        var legacyConfig = new EMS2ConfigProperties();
+        legacyConfig.setUserRoles(fixture.url("roles") + "/%s");
+        legacyConfig.setNewUserAuthorizationOnEntity(fixture.url("grants"));
+        var properties = new TileEntitlementProperties();
+        properties.setEntityIds(Map.of(ALPHA, 7L, BETA, 8L));
+        properties.setSubjectPaths(Map.of(ALPHA + "/ALPHA_FEATURE", "/ALPHA_FEATURE"));
+        return new RoutingAuthorizationService(repository,
+            new EMS2AuthorizationImplementation(new RestTemplate(), JSON, legacyConfig),
+            new EMS3AuthorizationImplementation(fixture.modernConfig()), properties);
     }
 
     private static ResponseEntity<ResponseOfAuthenticate> login(JwtAuthenticationController controller,
@@ -355,7 +426,7 @@ class DatabaseRoutedAuthorizationIntegrationTest {
 
     private static List<Map<String, Object>> drawerRows() {
         var rows = new ArrayList<Map<String, Object>>();
-        rows.add(tileRow(1, "alpha", ALPHA, "/ALPHA_FEATURE", false));
+        rows.add(tileRow(1, "alpha", ALPHA, "ALPHA_FEATURE", false));
         rows.add(tileRow(2, "beta", BETA, "BETA_FEATURE", false));
         rows.add(tileRow(3, "hidden", ALPHA, "NO_GRANTED_FEATURE", false));
         rows.add(tileRow(4, "template", "", "", true));
@@ -378,20 +449,13 @@ class DatabaseRoutedAuthorizationIntegrationTest {
     }
 
     private static void switchToEms3(String entity, long bffId, long uid) throws Exception {
-        // These fixture mappings are intentionally unrelated to production EMS3 app assignments.
+        // Fixture mappings are intentionally unrelated to production CES registrations.
         try (var connection = connect(); var statement = connection.prepareStatement("UPDATE " + SCHEMA
-            + ".authorization_application SET provider = 'EMS3', bff_entity_id = ?, ems3_app_name = ?,"
-            + " ems3_app_id = 'poc-itam', ems3_app_uid = ?, ems3_itam_id = 'poc-itam', subject_long_names = ?::jsonb,"
-            + " updated_by = 'poc-test' WHERE bff_entity_name = ?")) {
-            statement.setLong(1, bffId);
-            statement.setString(2, entity + "_APP");
-            statement.setLong(3, uid);
-            statement.setString(4, entity.equals(ALPHA) ? "{\"ALPHA_FEATURE\":\"/ALPHA_FEATURE\"}" : "{}");
-            statement.setString(5, entity);
-            if (statement.executeUpdate() == 0) {
-                execute("INSERT INTO " + SCHEMA + ".authorization_application (bff_entity_name) VALUES ('" + entity + "')");
-                switchToEms3(entity, bffId, uid);
-            }
+            + ".application_tile SET provider = 'EMS3', ems3_app_name = ?,"
+            + " ems3_app_id = 'poc-itam', ems3_subject = ems2_subject WHERE ems2_entities = ?")) {
+            statement.setString(1, entity + "_APP");
+            statement.setString(2, entity);
+            assertTrue(statement.executeUpdate() > 0);
         }
     }
 

@@ -44,7 +44,7 @@ public class AuthConfig {
     private EMS3ConfigProperties ems3ConfigProperties;
 
     @Autowired
-    private AuthorizationApplicationRepo authorizationApplicationRepo;
+    private TileEntitlementProperties tileEntitlementProperties;
 
     @Autowired
     private JWTConfigProperties jwtConfigProperties;
@@ -138,9 +138,9 @@ public class AuthConfig {
                 .setConnectTimeout(ems2ConfigProperties.getConnectTimeout())
                 .setReadTimeout(ems2ConfigProperties.getReadTimeout())
                 .build();
-        return new RoutingAuthorizationService(authorizationApplicationRepo,
+        return new RoutingAuthorizationService(applicationCategoryRepo,
             new EMS2AuthorizationImplementation(restTemplate, objectMapper, ems2ConfigProperties),
-            new EMS3AuthorizationImplementation(ems3ConfigProperties));
+            new EMS3AuthorizationImplementation(ems3ConfigProperties), tileEntitlementProperties);
     }
 
     @Bean

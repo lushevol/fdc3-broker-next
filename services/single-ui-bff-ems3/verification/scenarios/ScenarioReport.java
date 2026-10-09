@@ -2,9 +2,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.scb.sso.singleuibff.dto.ems2.v2.*;
-import com.scb.sso.singleuibff.entity.AuthorizationApplication;
+import com.scb.sso.singleuibff.config.TileEntitlementProperties;
+import com.scb.sso.singleuibff.entity.ApplicationCategory;
+import com.scb.sso.singleuibff.entity.ApplicationTile;
+import com.scb.sso.singleuibff.entity.ImportMap;
 import com.scb.sso.singleuibff.repository.ApplicationCategoryRepo;
-import com.scb.sso.singleuibff.repository.AuthorizationApplicationRepo;
 import com.scb.sso.singleuibff.service.v2.AuthorizationService;
 import com.scb.sso.singleuibff.service.v2.implementation.RoutingAuthorizationService;
 import com.scb.sso.singleuibff.util.AdminModuleUtil;
@@ -43,13 +45,14 @@ public class ScenarioReport {
                 .applySetting("hibernate.connection.url", url + "?currentSchema=" + SCHEMA)
                 .applySetting("hibernate.connection.username", USER)
                 .applySetting("hibernate.connection.password", "")
-                .applySetting("hibernate.hbm2ddl.auto", "validate")
+                .applySetting("hibernate.hbm2ddl.auto", "none")
                 .applySetting("hibernate.physical_naming_strategy", "org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy")
                 .build();
-            sessions = new MetadataSources(registry).addAnnotatedClass(AuthorizationApplication.class)
+            sessions = new MetadataSources(registry).addAnnotatedClass(ApplicationCategory.class)
+                .addAnnotatedClass(ApplicationTile.class).addAnnotatedClass(ImportMap.class)
                 .buildMetadata().buildSessionFactory();
             var repository = new JpaRepositoryFactory(SharedEntityManagerCreator.createSharedEntityManager(sessions))
-                .getRepository(AuthorizationApplicationRepo.class);
+                .getRepository(ApplicationCategoryRepo.class);
             String query = ApplicationCategoryRepo.class.getMethod("getDrawers").getAnnotation(Query.class).value();
             var rows = query(query);
             var filter = new AdminModuleUtil(null, JSON, null, null);
@@ -58,10 +61,10 @@ public class ScenarioReport {
             require(new TreeSet<>(rows.stream().map(row -> ((Number) row.get("application_tile_id")).intValue()).toList()).equals(new TreeSet<>(expected)),
                 "SQL candidates differ from independent CSV replay");
             var report = new LinkedHashMap<String, Object>();
-            report.put("evidence", "Actual PostgreSQL query, actual mapping migration/JPA router and actual AdminModuleUtil; normalized provider fixtures, no browser/live EMS");
+            report.put("evidence", "Actual PostgreSQL tile-provider query/migration/JPA router and AdminModuleUtil; normalized synthetic provider fixtures, no browser/live EMS");
             report.put("catalogueRows", rows.size());
             report.put("requestedEntityCount", scope.size());
-            report.put("mappingRowCount", scalar("SELECT count(*) FROM " + SCHEMA + ".authorization_application"));
+            report.put("tileConfigurationRowCount", scalar("SELECT count(*) FROM " + SCHEMA + ".application_tile"));
             report.put("candidateTileIds", expected);
             report.put("templates", data.get("templateCandidateTileIds"));
             var combinations = new ArrayList<Map<String, Object>>();
@@ -69,8 +72,8 @@ public class ScenarioReport {
                 var assigned = new ArrayList<Map<String, String>>();
                 for (int bit = 0; bit < ROLES.size(); bit++) if ((mask & (1 << bit)) != 0) assigned.add(ROLES.get(bit));
                 List<Long> baseline = null;
-                for (String pattern : List.of("EMS2/EMS2", "EMS2/EMS3", "EMS3/EMS2", "EMS3/EMS3", "ALL_EMS3")) {
-                    configure(pattern);
+                for (String pattern : List.of("EMS2/EMS2", "EMS2/EMS3", "EMS3/EMS2", "EMS3/EMS3", "STRATEGIC_ONLY")) {
+                    configure(pattern, data);
                     var calls = new LinkedHashMap<String, List<List<String>>>();
                     calls.put("EMS2", new ArrayList<>());
                     calls.put("EMS3", new ArrayList<>());
@@ -79,18 +82,23 @@ public class ScenarioReport {
                         var normalized = result(data, assigned, entities); normalized.setAccountName(user); return normalized;
                     };
                     var router = new RoutingAuthorizationService(repository, legacy, (user, applications) -> {
-                        var entities = applications.stream().map(AuthorizationApplication::getBffEntityName).toList();
+                        var entities = applications.stream().map(application -> application.appName().substring("synthetic:".length())).toList();
                         calls.get("EMS3").add(entities);
-                        var normalized = result(data, assigned, entities); normalized.setAccountName(user); return normalized;
-                    });
-                    var grants = router.getEntitlements("synthetic-user-" + mask, scope).getEntities();
-                    var drawers = filter.getDrawer(rows, grants);
+                        var normalized = result(data, assigned, entities);
+                        for (var entity : normalized.getEntities()) {
+                            entity.setName("synthetic:" + entity.getName()); entity.setApplicationName(entity.getName());
+                        }
+                        normalized.setAccountName(user); return normalized;
+                    }, compatibility(data));
+                    var authorization = router.getEntitlements("synthetic-user-" + mask, List.of());
+                    var drawers = filter.getDrawer(authorization.getAuthorizedTiles(), authorization.getEntities());
                     var ids = visible(drawers);
                     if (baseline == null) baseline = ids;
                     require(baseline.equals(ids), "Provider selection changed visibility for mask " + mask);
-                    if (pattern.equals("ALL_EMS3")) require(calls.get("EMS2").isEmpty(), "All-EMS3 called EMS2");
                     if (pattern.equals("EMS2/EMS2")) require(calls.get("EMS3").isEmpty(), "All-EMS2 called EMS3");
-                    var chosen = repository.findByBffEntityNameIn(List.of("X_RATANONE", "FMO PORTAL ADMIN"));
+                    require(calls.get("EMS2").size() <= 1 && calls.get("EMS3").size() <= 1, "Provider calls grew with tile count");
+                    var chosen = repository.getAuthorizationTiles().orElseThrow().stream()
+                        .filter(row -> "EMS3".equals(row.get("provider"))).toList();
                     var entry = new LinkedHashMap<String, Object>();
                     entry.put("roleMask", mask);
                     entry.put("roles", assigned);
@@ -101,8 +109,9 @@ public class ScenarioReport {
                     entry.put("providerCalls", Map.of("EMS2", calls.get("EMS2").size(), "EMS3", calls.get("EMS3").size()));
                     entry.put("providerScopeSizes", Map.of("EMS2", calls.get("EMS2").stream().map(List::size).toList(),
                         "EMS3", calls.get("EMS3").stream().map(List::size).toList()));
-                    entry.put("routeRecords", chosen.stream().map(route -> Map.of("id", route.getId(), "entity", route.getBffEntityName(),
-                        "provider", route.getProvider(), "version", route.getMappingVersion())).toList());
+                    entry.put("routeRecords", chosen.stream().map(route -> Map.of("tileId", route.get("application_tile_id"),
+                        "entity", route.get("ems2_entities"), "subject", route.get("ems2_subject"),
+                        "provider", route.get("provider"), "appName", route.get("ems3_app_name"), "feature", route.get("ems3_subject"))).toList());
                     combinations.add(entry);
                 }
             }
@@ -142,17 +151,43 @@ public class ScenarioReport {
         }
     }
 
-    static void configure(String pattern) throws Exception {
-        sql("UPDATE " + SCHEMA + ".authorization_application SET provider = 'EMS2'");
-        if (pattern.equals("ALL_EMS3")) sql("UPDATE " + SCHEMA + ".authorization_application SET provider='EMS3', bff_entity_id=id, ems3_app_name=bff_entity_name, ems3_app_id='synthetic-app-'||id, ems3_app_uid=id, ems3_itam_id='synthetic-itam-'||id");
-        for (var entry : List.of(Map.entry("X_RATANONE", 1L), Map.entry("FMO PORTAL ADMIN", 2L))) {
-            boolean modern = pattern.equals("ALL_EMS3") || pattern.split("/")[entry.getValue().intValue() - 1].equals("EMS3");
-            if (modern) {
-                try (var connection = connect(); var statement = connection.prepareStatement("UPDATE " + SCHEMA + ".authorization_application SET provider='EMS3', bff_entity_id=?, ems3_app_name=bff_entity_name, ems3_app_id='synthetic-app-'||id, ems3_app_uid=id, ems3_itam_id='synthetic-itam-'||id WHERE bff_entity_name=?")) {
-                    statement.setLong(1, entry.getValue()); statement.setString(2, entry.getKey()); statement.executeUpdate();
+    static void configure(String pattern, JsonNode data) throws Exception {
+        sql("UPDATE " + SCHEMA + ".application_tile SET provider = 'EMS2'");
+        try (var connection = connect(); var statement = connection.prepareStatement("UPDATE " + SCHEMA
+            + ".application_tile SET provider='EMS3', ems3_app_id='synthetic-parent', ems3_app_name=?, ems3_subject=? WHERE application_tile_id=?")) {
+        connection.setAutoCommit(false);
+        for (var row : query("SELECT * FROM " + SCHEMA + ".application_tile")) {
+            String entity = Objects.toString(row.get("ems2_entities"), "");
+            String subject = Objects.toString(row.get("ems2_subject"), "");
+            if (Boolean.TRUE.equals(row.get("is_template")) || subject.isBlank()) continue;
+            boolean strategic = "X_RATANONE".equals(entity) && "RATAN_STRATEGIC_CASHFLOW_BLOTTER".equals(subject);
+            boolean modern = pattern.equals("STRATEGIC_ONLY") ? strategic
+                : ("X_RATANONE".equals(entity) && pattern.split("/")[0].equals("EMS3"))
+                    || ("FMO PORTAL ADMIN".equals(entity) && pattern.split("/")[1].equals("EMS3"));
+            if (!modern) continue;
+            String feature = subject;
+            for (var catalog : data.get("xmlCatalogs")) {
+                if (!entity.equals(catalog.get("entityName").asText())) continue;
+                for (var grant : catalog.get("grants")) {
+                    if (subject.equalsIgnoreCase(grant.get("longName").asText())) feature = grant.get("subject").asText();
                 }
             }
+            statement.setString(1, "synthetic:" + entity); statement.setString(2, feature);
+            statement.setObject(3, row.get("application_tile_id")); statement.executeUpdate();
         }
+        connection.commit();
+        }
+    }
+
+    static TileEntitlementProperties compatibility(JsonNode data) {
+        var properties = new TileEntitlementProperties();
+        properties.setEntityIds(Map.of("X_RATANONE", 1L, "FMO PORTAL ADMIN", 2L, "STAMP_STATIC", 3L));
+        var paths = new HashMap<String, String>();
+        for (var catalog : data.get("xmlCatalogs")) for (var grant : catalog.get("grants")) {
+            String entity = catalog.get("entityName").asText();
+            paths.put(entity + "/" + grant.get("subject").asText(), grant.get("longName").asText());
+        }
+        properties.setSubjectPaths(paths); return properties;
     }
 
     static Ems2Result result(JsonNode data, List<Map<String, String>> assigned, List<String> scope) {
@@ -193,6 +228,7 @@ public class ScenarioReport {
         sql("CREATE TABLE " + SCHEMA + ".application_category (application_category_id bigint, label text, is_active boolean, order_no bigint)");
         sql("CREATE TABLE " + SCHEMA + ".import_map (import_map_id bigint, key_name text, is_active boolean)");
         sql("CREATE TABLE " + SCHEMA + ".application_tile (application_tile_id bigint, application_category_id bigint, import_map_id bigint, is_active boolean, is_template boolean, ems2_entities text, ems2_subject text, module text, tile text, title text, subtitle text, image_dark_theme text, image_light_theme text, email_support text, order_no bigint)");
+        sql("CREATE TABLE " + SCHEMA + ".application_tile_audit (application_tile_audit_id bigint, application_tile_id bigint, is_active boolean, is_template boolean, ems2_entities text, ems2_subject text, transaction_mode text)");
         load("application_category", data.get("categories"), "application_category_id,label,is_active,order_no");
         load("import_map", data.get("importMaps"), "import_map_id,key_name,is_active");
         load("application_tile", data.get("tiles"), "application_tile_id,application_category_id,import_map_id,is_active,is_template,ems2_entities,ems2_subject,module,tile,title,subtitle,image_dark_theme,image_light_theme,email_support,order_no");

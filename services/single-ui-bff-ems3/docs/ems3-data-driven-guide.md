@@ -1,6 +1,6 @@
 # EMS2 to EMS3: a short data guide
 
-The proposal is to extend **`application_tile`** with a provider and EMS3
+The implementation extends **`application_tile`** with a provider and EMS3
 lookup fields. Each tile selects its entitlement source. There is no new
 `authorization_application` table in this target design.
 
@@ -10,6 +10,11 @@ Country, region and business-row access remain separate data entitlements.
 Use the [approval plan](ems3-approval-plan.md) and [monthly timeline](ems3-monthly-timeline.md)
 for effort and dates. The first production pilot is FlowZero only. The mixed
 RATAN/FlowZero example below shows the later rollout pattern.
+
+The branch now implements the selected tile feature pattern. The deployment
+[configuration and verification notes](ems3-tile-implementation-results.md) show
+how to keep FlowZero's untiled functions on EMS2 during this first phase.
+Live CES onboarding and production permission equivalence still need UAT proof.
 
 ## 1. Before migration: actual data
 
@@ -98,14 +103,14 @@ otherwise stated. These mappings describe the revised tile-based target.
 | Meaning | EMS2 response field | EMS3 response field | Portal result / rule |
 |---|---|---|---|
 | User | Account response `accountName`; grant response key `[userId]` | Aggregate `user_data.user_id` | Validate against the signed-in user; internal `accountName` stays that user ID. |
-| Application/entity name | `role.entity.name` | Detail `appName`; aggregate `user_data.app_name` | Match the tile's `ems3_app_name`, then return `name = ems2_entities`, e.g. `RATAN_ENTITLEMENT_RULE` -> `X_RATANONE`. `applicationName` holds the EMS3 app name. |
+| Application/entity name | `role.entity.name` | Detail `appName`; aggregate `user_data.app_name` | Match the tile's `ems3_app_name`, then return `name = ems2_entities`, e.g. `RATAN_ENTITLEMENT_RULE` -> `X_RATANONE`. `applicationName` holds the EMS3 app name for a CES-only role; mixed roles retain EMS2 metadata. |
 | Application registration ID | No direct equivalent to the EMS3 registration | Detail `appId`; aggregate `user_data.itam_id` | Validate against `ems3_app_id` only after confirming their relationship with CES. Do not use this as the Portal entity ID. |
 | User role name | `role.name`, also encoded in account `entitlementTypes[].uniqueName` | Detail `entitlementName` | `roleName`, e.g. `FMO_OPS_BO`. This is not the tile's admin `ems2_role`. Any role rename needs an approved mapping. |
-| Subject/feature name | `subject.name` | `featureActionDtos[].features.featureName` | Select using `ems3_subject`, then return `subjects[].name = ems2_subject`. |
+| Subject/feature name | `subject.name` | `featureActionDtos[].features.featureName` | Select using `ems3_subject`, then return the Portal subject name from `ems2_subject`, with an optional `subject-names` compatibility override for path-only bindings. |
 | Subject path/display name | `subject.longName` | No direct equivalent in the supplied detail response | Return the agreed Portal `subjects[].longName`; preserve existing paths where required. |
 | Action name | `action.name` | `featureActionDtos[].actions.actionName` | `subjects[].actions[].name`; preserve the action name, e.g. `F_Export_Data`, or use an approved rename. |
-| Portal entity numeric ID | `role.entity.id` (also in subject/action entity references) | No equivalent Portal ID; `appUID` is an EMS3 application identity | Preserve the agreed Portal `id`; do not substitute `appId` or `appUID`. Its configuration source still needs to be decided for the tile-only implementation. |
-| Role numeric ID | `role.id` | Detail `entitlementId` (numeric string) | `roleId`; the current POC converts the EMS3 string to a number. It is not necessarily the old EMS2 role ID. |
+| Portal entity numeric ID | `role.entity.id` (also in subject/action entity references) | No equivalent Portal ID; `appUID` is an EMS3 application identity | Preserve the agreed Portal `id`; do not substitute `appId` or `appUID`. Configure it in `scb.tile-entitlements.entity-ids`. |
+| Role numeric ID | `role.id` | Detail `entitlementId` (numeric string) | `roleId`; retain EMS2 metadata for a mixed role, otherwise use the numeric CES role ID. |
 | Subject numeric ID | `subject.id` | `featureActionDtos[].features.featureId` | `subjects[].id`; the current POC uses the EMS3 feature ID. |
 | Action numeric ID | `action.id` | `featureActionDtos[].actions.actionId` | `subjects[].actions[].id`; the current POC uses the EMS3 action ID. |
 | One grant's numeric ID | Grant `id` | No equivalent grant ID in the supplied EMS3 detail | EMS2 fills `subjects[].actions[].entitlementId` with the grant ID; EMS3 leaves it null. EMS3 `entitlementId` identifies the role, not this grant. |
@@ -115,8 +120,8 @@ EMS2 account `uniqueName` contains
 subject and action names, but does not supply these numeric API IDs or user
 assignments. EMS2 `applicationName` is descriptive metadata, not the entity
 lookup key. Confirm numeric-ID consumers before launch; the two systems' IDs
-are not interchangeable. The tile-only revision must define how to preserve
-Portal entity IDs without the old application route table.
+are not interchangeable. The tile router uses the deployment compatibility map for Portal IDs, and
+validates them against EMS2 metadata when both providers serve an entity.
 
 The aggregate EMS3 response is a cross-check, not the source for assigning
 permissions to individual roles:
@@ -163,7 +168,7 @@ This is an illustration of the mapping, not a live migrated user response.
 | Subject/feature | `subject.name = RATAN_STRATEGIC_CASHFLOW_BLOTTER` | `features.featureName = RATAN_STRATEGIC_CASHFLOW_BLOTTER` | `subjects[].name = RATAN_STRATEGIC_CASHFLOW_BLOTTER` |
 | Subject path | `subject.longName = /RATAN_STRATEGIC_CASHFLOW_BLOTTER` | No `longName` field | Preserve `/RATAN_STRATEGIC_CASHFLOW_BLOTTER` in `subjects[].longName`. |
 | Action | `action.name = F_Export_Data` | `actions.actionName = F_Export_Data` | `subjects[].actions[].name = F_Export_Data` |
-| Role ID | Not supplied in the XML | `entitlementId = "9001"` (synthetic) | `roleId = 9001` in this POC example |
+| Role ID | Not supplied in the XML | `entitlementId = "9001"` (synthetic) | `roleId = 9001` for a CES-only role; mixed roles retain EMS2 metadata |
 | Subject ID | Not supplied in the XML | `features.featureId = 9101` (synthetic) | `subjects[].id = 9101` in this POC example |
 | Action ID | Not supplied in the XML | `actions.actionId = 9206` (synthetic) | `subjects[].actions[].id = 9206` in this POC example |
 
@@ -185,13 +190,12 @@ FlowZero EMS2 user response or matrix to prove the roles/actions are the same.
 | Subject/feature | Tile `ems2_subject = FLOW_ZERO_RAISE REQUEST` | `features.featureName = RAISE_REQUEST` | `subjects[].name = FLOW_ZERO_RAISE REQUEST` |
 | Subject path | EMS2 `longName` not supplied | No `longName` field | Use the agreed alias `FLOW_ZERO_RAISE REQUEST` for `subjects[].longName`. |
 | Action | EMS2 action not supplied | `actions.actionName = RAISE_NEW_REQUEST` | `subjects[].actions[].name = RAISE_NEW_REQUEST`, subject to owner confirmation. |
-| Role ID | Not supplied | `entitlementId = "339"` | `roleId = 339` under the current POC conversion rule |
+| Role ID | Not supplied | `entitlementId = "339"` | `roleId = 339` for a CES-only role; mixed roles retain EMS2 metadata |
 | Subject ID | Not supplied | `features.featureId = 1500` | `subjects[].id = 1500` under the current POC conversion rule |
 | Action ID | Not supplied | `actions.actionId = 345` | `subjects[].actions[].id = 345` under the current POC conversion rule |
 
 Here, both names need mapping: `FLOWZERO` -> `FLOW_ZERO` and
-`RAISE_REQUEST` -> `FLOW_ZERO_RAISE REQUEST`. The existing adapter still needs
-the `name` alias update; changing only `longName` does not preserve JWT keys.
+`RAISE_REQUEST` -> `FLOW_ZERO_RAISE REQUEST`. The tile router now updates both `name` and `longName`, preserving the Portal JWT key.
 
 The resulting parsed Portal permission map could look like this. It combines
 the two examples for illustration; it is not one real user's captured response.
@@ -286,29 +290,24 @@ function permissions keep EMS2 as their source during the transition.
 
 ## 3. Rough routing and data flow
 
-The following is pseudocode for the new design, not the current implementation:
+The following is a simplified sketch of the tile router. The executable code is in
+[`RoutingAuthorizationService`](../src/main/java/com/scb/sso/singleuibff/service/v2/implementation/RoutingAuthorizationService.java):
 
 ```text
-tiles = readActiveTiles()
-validateProviderFieldsAndSharedSubjectMappings(tiles)
+snapshot = readVisibleTilesAndEffectiveOwnershipTogether()
+legacyScope = activeEms2Entities(snapshot) + configuredRetainedEms2Entities
+cesApps = distinctRegistrationsFromActiveEms3Tiles(snapshot)
 
-scopes = scopesFromTilesAndConfirmedNonTileMappings(tiles)
-ems2 = fetchEms2OnceIfNeeded(userId, scopes)
-ems3 = fetchEms3OnceIfNeeded(userId, scopes)
+ems2 = lookupEms2IfNeeded(userId, legacyScope)
+ems3 = lookupAndValidateCompleteCesResponsesIfNeeded(userId, cesApps)
+legacy = removeEms3OwnedSubjectsFromAllLegacyRoles(ems2, snapshot.ownership)
+modern = selectConfiguredFeaturesAndMapToPortalAliases(ems3, snapshot.tiles)
 
-for tile in tiles:
-    if tile.provider == EMS2:
-        grants = selectEms2UsingExistingTileRules(ems2, tile)
-        visible[tile.id] = existingEms2Visibility(tile, grants)
-    else:
-        grants = select(ems3, tile.ems3_app_id,
-                        tile.ems3_app_name, tile.ems3_subject)
-        visible[tile.id] = hasGrantedSubject(grants)
+for tile in snapshot.visibleTiles:
+    source = modern if tile.provider == EMS3 else legacy
+    visible[tile.id] = existingTemplateOrEntitySubjectRules(tile, source)
 
-    picked += mapToPortalNames(grants, tile.ems2_entities, tile.ems2_subject)
-
-picked += resolveConfirmedNonTileFunctionMappings(ems2, ems3)
-permissions = mergeByEntityAndUserRoleAndSubject(picked)
+permissions = mergeByEntityAndUserRoleAndSubject(legacy + modern)
 return { drawers: visibleTiles(visible),
          entities: permissions, entitlementToken: sign(permissions) }
 ```

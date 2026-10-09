@@ -162,7 +162,7 @@ class JwtAuthorizationAvailabilityTest {
             .andExpect(header().doesNotExist(HEADER_JWT_TOKEN))
             .andExpect(header().doesNotExist(HEADER_REFRESH_TOKEN));
 
-        verifyNoInteractions(authorizationService);
+        verify(authorizationService, never()).getEntitlements(any(), any());
         assertNoTokenGeneration();
     }
 

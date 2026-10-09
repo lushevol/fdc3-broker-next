@@ -331,6 +331,13 @@ scb:
     token-proxy-host: ${EMS3_TOKEN_PROXY_HOST:}
     token-proxy-port: ${EMS3_TOKEN_PROXY_PORT:0}
     allow-insecure-localhost: false
+  tile-entitlements:
+    # Portal IDs/paths are deployment compatibility metadata, not provider routing.
+    # Fill IDs before selecting EMS3; preserve untiled EMS2 functions explicitly.
+    entity-ids: {}
+    subject-names: {}
+    subject-paths: {}
+    retain-ems2-entities: []
   mfa:
     headers:
       X-Cert: ${MFA_CERT}

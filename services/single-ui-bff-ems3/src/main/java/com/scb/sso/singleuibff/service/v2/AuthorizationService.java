@@ -6,6 +6,8 @@ import java.util.List;
 
 public interface AuthorizationService {
 
+    default boolean usesTileSnapshot() { return false; }
+
     Ems2Result getEntitlements(String userId, List<String> requestEntities);
 
 }

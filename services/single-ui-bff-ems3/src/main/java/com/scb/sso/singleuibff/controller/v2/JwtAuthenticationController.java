@@ -97,6 +97,7 @@ public class JwtAuthenticationController {
         List<Map<String, Object>> applicationCategories = currentApplicationCategories();
         Ems2Result ems2Result = currentEntitlements(username, applicationCategories);
         List<Entity> entities = ems2Result.getEntities();
+        if (ems2Result.getAuthorizedTiles() != null) applicationCategories = ems2Result.getAuthorizedTiles();
         List<Map<String, Object>> drawers = adminModuleUtil.getDrawer(applicationCategories, entities);
         String jsonString = buildEntitlementString(entities);
         Map<String, String> userInfoPayload = new HashMap<>();
@@ -116,6 +117,7 @@ public class JwtAuthenticationController {
     }
 
     private List<Map<String, Object>> currentApplicationCategories() {
+        if (authorizationService.usesTileSnapshot()) return List.of();
         try {
             return applicationCategoryService.getDrawers()
                 .orElseThrow(() -> new AuthorizationUnavailableException("Application scope is unavailable"));
@@ -150,17 +152,14 @@ public class JwtAuthenticationController {
     }
 
     private String buildEntitlementString(List<Entity> entities) throws JsonProcessingException {
-        Map<String, Object> entitlements = new HashMap<>();
-        entities.stream().forEach(entity -> {
-            String entityRole = entity.getName() + ":" + entity.getRoleName();
-            Map<String, Object> action = new HashMap<>();
-            List<Subject> subjects = entity.getSubjects();
-            subjects.stream().forEach(subject -> {
-                List<String> actions = subject.getActions().stream().map(Action::getName).collect(Collectors.toList());
-                action.put(subject.getName(), actions);
-            });
-            entitlements.put(entityRole, action);
-        });
+        Map<String, Map<String, Set<String>>> entitlements = new LinkedHashMap<>();
+        for (var entity : entities) {
+            var subjects = entitlements.computeIfAbsent(entity.getName() + ":" + entity.getRoleName(), unused -> new LinkedHashMap<>());
+            for (var subject : entity.getSubjects()) {
+                var actions = subjects.computeIfAbsent(subject.getName(), unused -> new LinkedHashSet<>());
+                subject.getActions().stream().map(Action::getName).forEach(actions::add);
+            }
+        }
         return objectMapper.writeValueAsString(entitlements);
     }
 

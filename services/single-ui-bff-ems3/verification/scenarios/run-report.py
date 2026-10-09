@@ -20,6 +20,6 @@ java_home = os.environ.get("JAVA_HOME", "/opt/homebrew/opt/openjdk@17/libexec/op
 subprocess.run([
     str(Path(java_home) / "bin" / "java"), "--class-path", classpath,
     str(directory / "ScenarioReport.java"), str(args.input.resolve()),
-    str(service / "src/main/resources/db/migration/V1_0_10__authorization_application.sql"),
+    str(service / "src/main/resources/db/migration/V1_0_11__tile_entitlement_provider.sql"),
     str(args.output.resolve()),
 ], check=True, cwd=service)

@@ -1,7 +1,8 @@
 # EMS3 tile implementation plan
 
 Review date: 9 October 2026. Branch: `codex/ems3-single-ui-bff`.
-This is the plan for review; runtime code has not changed.
+The minimum delivery, stages 1–3, is implemented and locally verified.
+See [implementation results](ems3-tile-implementation-results.md) for configuration and verification.
 
 Use the [data guide](ems3-data-driven-guide.md) for field mappings and the
 [approval plan](ems3-approval-plan.md) for CES onboarding, dates and user access.
@@ -25,13 +26,12 @@ not switch live applications. Production CES identities still need confirmation.
 ## What the branch already has
 
 The forked service has EMS2/CES adapters, strict failure handling and fresh
-permission checks on authentication paths. Its router still reads
-`authorization_application` and chooses one provider for an entire entity.
-The tile-based design in the latest guide has not been implemented.
+permission checks on authentication paths. The new router reads tile configuration and effective ownership in one snapshot.
+`authorization_application` remains in Flyway history and is no longer read at runtime.
 
-The review also found that the JWT builder overwrites repeated
-`entity:role` records, and the CES adapter changes FlowZero's `longName`
-without changing its JWT subject `name`. Both need fixing for mixed routing.
+The new JWT builder unions repeated `entity:role` fragments. The router maps
+both FlowZero's subject `name` and `longName` to Portal aliases, including
+compatibility overrides for tiles that store a path rather than a subject name.
 
 ## Implementation stages
 
@@ -111,5 +111,6 @@ the FMAA service-token contract, and temporary eForms/approved assignments.
 OneCert self-service can follow its own onboarding. These are live acceptance
 dependencies; they do not prevent building the tile pattern with test fixtures.
 
-The GitNexus index refers to an older sibling checkout. The review used its
-query capability, then verified findings against this branch's source.
+The planning review used the older index and verified findings against source.
+Implementation impact checks use a current focused BFF index; pre-commit scope
+checks use a matching local baseline snapshot to account for monorepo paths.
