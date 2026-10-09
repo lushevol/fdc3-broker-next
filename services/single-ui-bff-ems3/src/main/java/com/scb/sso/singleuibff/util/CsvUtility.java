@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
+import org.apache.commons.csv.DuplicateHeaderMode;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -86,7 +87,8 @@ public class CsvUtility {
     public List<ApplicationTileConfig> getTiles(InputStream is, String ems2Role) {
         try (BufferedReader bReader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
             CSVFormat csvFormat = CSVFormat.DEFAULT.builder()
-                .setHeader(TILE_HEADERS)
+                .setHeader()
+                .setDuplicateHeaderMode(DuplicateHeaderMode.DISALLOW)
                 .setSkipHeaderRecord(true)
                 .build();
             List<ApplicationTileConfig> data = new ArrayList<ApplicationTileConfig>();
@@ -111,6 +113,10 @@ public class CsvUtility {
                         .tile(tile.trim())
                         .ems2Subject(csvRecord.get("Role Subject"))
                         .ems2Entities(csvRecord.get("Role Entities"))
+                        .provider(optionalTileColumn(csvRecord, "Provider"))
+                        .ems3AppId(optionalTileColumn(csvRecord, "EMS3 App ID"))
+                        .ems3AppName(optionalTileColumn(csvRecord, "EMS3 App Name"))
+                        .ems3Subject(optionalTileColumn(csvRecord, "EMS3 Subject"))
                         .isTemplate(csvRecord.get("Is Template?").equalsIgnoreCase("true"))
                         .emailSupport(csvRecord.get("Email Support"))
                         .ems2Role(ems2Role)
@@ -126,6 +132,10 @@ public class CsvUtility {
         } catch (Exception e) {
             throw new RuntimeException("CSV data is failed to parse: " + e.getMessage());
         }
+    }
+
+    private static String optionalTileColumn(CSVRecord row, String header) {
+        return row.isMapped(header) ? row.get(header).trim() : null;
     }
 
 }

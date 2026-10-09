@@ -45,6 +45,15 @@ public class ApplicationTileAudit {
     @Column(name = "ems2_entities", length = 32000)
     @Builder.Default
     private String ems2Entities = "";
+    @Column(name = "provider", nullable = false, length = 4)
+    @Builder.Default
+    private String provider = "EMS2";
+    @Column(name = "ems3_app_id", columnDefinition = "text")
+    private String ems3AppId;
+    @Column(name = "ems3_app_name", columnDefinition = "text")
+    private String ems3AppName;
+    @Column(name = "ems3_subject", columnDefinition = "text")
+    private String ems3Subject;
     @Builder.Default
     private boolean isTemplate = false;
     @Builder.Default

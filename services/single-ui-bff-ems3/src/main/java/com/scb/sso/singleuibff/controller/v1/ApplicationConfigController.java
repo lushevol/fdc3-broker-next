@@ -2,6 +2,9 @@ package com.scb.sso.singleuibff.controller.v1;
 
 import com.scb.sso.singleuibff.dto.config.ApplicationCategoryConfig;
 import com.scb.sso.singleuibff.dto.config.ApplicationTileConfig;
+import com.scb.sso.singleuibff.util.TileEntitlementConfiguration;
+import com.scb.sso.singleuibff.util.ConfigurationTransactions;
+import org.springframework.transaction.annotation.Transactional;
 import com.scb.sso.singleuibff.dto.config.FmaaResult;
 import com.scb.sso.singleuibff.dto.config.ImportMapConfig;
 import com.scb.sso.singleuibff.dto.response.ResponseOfBulkAuth;
@@ -50,6 +53,7 @@ public class ApplicationConfigController {
     @Autowired
     private ApplicationTileAuditService applicationTileAuditService;
 
+    @Transactional(rollbackFor = Exception.class)
     @PostMapping(value = "v1/fmo/admin/config/upload")
     public ResponseEntity<?> upload(@NotNull @RequestParam("fmaa_access_token") String fmaaAccessToken,
         @NotNull @RequestParam("moduleMap") MultipartFile moduleMap,
@@ -83,7 +87,8 @@ public class ApplicationConfigController {
             result.put("applicationTileSeq", applicationTileService.setApplicationTileSeq());
 
             return ResponseEntity.ok().body(ResponseOfBulkAuth.builder().result(true).data(result).build());
-        } catch (RecordNotCreatedException | NoSuchElementException | IOException e) {
+        } catch (RecordNotCreatedException | NoSuchElementException | IOException | IllegalArgumentException e) {
+            ConfigurationTransactions.rollback();
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(ResponseOfBulkAuth.builder().result(false).errorMessage(e.getMessage()).build());
         }
@@ -183,6 +188,7 @@ public class ApplicationConfigController {
         return applicationCategories;
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public List<ApplicationTile> handleApplicationTile(List<ApplicationTileConfig> applicationTileConfigs, List<ImportMap> importMaps,
         List<ApplicationCategory> applicationCategories, String ems2Role) throws RecordNotCreatedException {
         List<ApplicationTileAudit> applicationTileAudits = new ArrayList<>();
@@ -231,6 +237,8 @@ public class ApplicationConfigController {
             applicationTileRec.setTile(applicationTileConfig.getTile());
             applicationTileRec.setEms2Entities(applicationTileConfig.getEms2Entities());
             applicationTileRec.setEms2Subject(applicationTileConfig.getEms2Subject());
+            TileEntitlementConfiguration.applyOverrides(applicationTileRec, applicationTileConfig.getProvider(),
+                applicationTileConfig.getEms3AppId(), applicationTileConfig.getEms3AppName(), applicationTileConfig.getEms3Subject());
             applicationTileRec.setEmailSupport(applicationTileConfig.getEmailSupport());
             applicationTileRec.setTemplate(applicationTileConfig.isTemplate());
             applicationTileRec.setActive(applicationTileConfig.isActive());
@@ -254,6 +262,10 @@ public class ApplicationConfigController {
                 .tile(applicationTileRec.getTile())
                 .ems2Entities(applicationTileRec.getEms2Entities())
                 .ems2Subject(applicationTileRec.getEms2Subject())
+                .provider(applicationTileRec.getProvider())
+                .ems3AppId(applicationTileRec.getEms3AppId())
+                .ems3AppName(applicationTileRec.getEms3AppName())
+                .ems3Subject(applicationTileRec.getEms3Subject())
                 .emailSupport(applicationTileRec.getEmailSupport())
                 .isTemplate(applicationTileRec.isTemplate())
                 .isActive(applicationTileRec.isActive())

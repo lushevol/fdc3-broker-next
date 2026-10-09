@@ -15,6 +15,9 @@ import com.scb.sso.singleuibff.service.v1.ApplicationTileAuditService;
 import com.scb.sso.singleuibff.service.v1.ApplicationTileService;
 import com.scb.sso.singleuibff.service.v1.ImportMapService;
 import com.scb.sso.singleuibff.util.AdminModuleUtil;
+import com.scb.sso.singleuibff.util.TileEntitlementConfiguration;
+import com.scb.sso.singleuibff.util.ConfigurationTransactions;
+import org.springframework.transaction.annotation.Transactional;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -43,10 +46,17 @@ public class ApplicationTileController {
     @Autowired
     private AdminModuleUtil adminModuleUtil;
 
+    @Transactional(rollbackFor = Exception.class)
     @PostMapping(value = "v1/fmo/admin/tile/update")
     public ResponseEntity<?> update(@NotNull @RequestBody RequestOfApplicationTile requestOfApplicationTile,
         HttpServletRequest httpServletRequest) {
         try {
+            String mode = requestOfApplicationTile.getMode() == null ? ""
+                : requestOfApplicationTile.getMode().trim().toLowerCase(Locale.ROOT);
+            if (!Set.of("maker", "checker", "deactivate").contains(mode)) {
+                throw new IllegalArgumentException("Tile update mode must be maker, checker or deactivate");
+            }
+            requestOfApplicationTile.setMode(mode);
             ApplicationTile applicationTile = applicationTileService.getById(requestOfApplicationTile.getApplicationTileId()).get();
             ApplicationCategory applicationCategory = applicationCategoryService
                 .getById(requestOfApplicationTile.getApplicationCategory().getApplicationCategoryId()).get();
@@ -57,7 +67,10 @@ public class ApplicationTileController {
             if (adminModuleUtil.checkEms2Role(ems2Role, importMap, applicationCategory, applicationTile)) {
                 throw RecordNotUpdatedException.builder().message("You do not have access to this record.").build();
             }
-            if (adminModuleUtil.validateChecker(applicationTile, requestOfApplicationTile)) {
+            if ("checker".equals(mode)) {
+                if (!adminModuleUtil.validateChecker(applicationTile, requestOfApplicationTile)) {
+                    throw RecordNotUpdatedException.builder().message("Only a pending tile can be approved.").build();
+                }
                 if (applicationTile.getUpdatedBy().equalsIgnoreCase(userName)) {
                     throw RecordNotUpdatedException.builder().message("Maker and Checker should be different user.").build();
                 }
@@ -65,11 +78,15 @@ public class ApplicationTileController {
             } else if (requestOfApplicationTile.getMode().equalsIgnoreCase("deactivate")) {
                 applicationTile.setActive(false);
             } else {
+                if (applicationTile.isActive()) {
+                    // Keep approved ownership even when an imported tile has no earlier audit.
+                    audit(applicationTile, applicationTile.getApplicationCategory(), applicationTile.getImportMap(), "published");
+                }
                 String title = adminModuleUtil.checkIfNull(requestOfApplicationTile.getTitle(), "");
                 String subtitle = adminModuleUtil.checkIfNull(requestOfApplicationTile.getSubtitle(), "");
                 String emailSupport = adminModuleUtil.checkIfNull(requestOfApplicationTile.getEmailSupport(), "");
-                String ems2Subject = adminModuleUtil.checkIfNull(requestOfApplicationTile.getEms2Subject(), "");
-                String ems2Entities = adminModuleUtil.checkIfNull(requestOfApplicationTile.getEms2Entities(), "");
+                String ems2Subject = adminModuleUtil.checkIfNull(requestOfApplicationTile.getEms2Subject(), applicationTile.getEms2Subject());
+                String ems2Entities = adminModuleUtil.checkIfNull(requestOfApplicationTile.getEms2Entities(), applicationTile.getEms2Entities());
                 String tile = adminModuleUtil.checkIfNull(requestOfApplicationTile.getTile(), "");
                 String module = adminModuleUtil.checkIfNull(requestOfApplicationTile.getModule(), "");
                 String imageLightTheme = adminModuleUtil.checkIfNull(requestOfApplicationTile.getImageLightTheme(), "");
@@ -96,6 +113,9 @@ public class ApplicationTileController {
                 applicationTile.setEmailSupport(emailSupport);
                 applicationTile.setTemplate(requestOfApplicationTile.isTemplate());
                 applicationTile.setOrderNo(requestOfApplicationTile.getOrderNo());
+                TileEntitlementConfiguration.applyOverrides(applicationTile, requestOfApplicationTile.getProvider(),
+                    requestOfApplicationTile.getEms3AppId(), requestOfApplicationTile.getEms3AppName(),
+                    requestOfApplicationTile.getEms3Subject());
             }
             applicationTile.setEms2Role(ems2Role.trim());
             applicationTile.setUpdatedBy(userName);
@@ -104,14 +124,17 @@ public class ApplicationTileController {
             audit(applicationTile, applicationCategory, importMap, requestOfApplicationTile.getMode().trim());
             return ResponseEntity.ok().body(ResponseOfAdminModule.builder().result(true).data(applicationTile).build());
         } catch (RecordNotFoundException | NoSuchElementException e) {
+            ConfigurationTransactions.rollback();
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(ResponseOfAdminModule.builder().result(false).errorMessage(e.getMessage()).build());
-        } catch (RecordNotUpdatedException | RecordNotCreatedException e) {
+        } catch (RecordNotUpdatedException | RecordNotCreatedException | IllegalArgumentException e) {
+            ConfigurationTransactions.rollback();
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(ResponseOfAdminModule.builder().result(false).errorMessage(e.getMessage()).build());
         }
     }
 
+    @Transactional(rollbackFor = Exception.class)
     @PostMapping(value = "v1/fmo/admin/tile/create")
     public ResponseEntity<?> create(@NotNull @RequestBody RequestOfApplicationTile requestOfApplicationTile,
         HttpServletRequest httpServletRequest) {
@@ -139,7 +162,7 @@ public class ApplicationTileController {
                 throw RecordNotCreatedException.builder().message("Please provide the value for the Title or Module Path or Tile Path.")
                     .build();
             }
-            ApplicationTile applicationTile = applicationTileService.create(ApplicationTile.builder()
+            ApplicationTile applicationTile = ApplicationTile.builder()
                 .applicationCategory(applicationCategory)
                 .ems2Role(ems2Role)
                 .createdBy(userName)
@@ -158,13 +181,19 @@ public class ApplicationTileController {
                 .emailSupport(emailSupport)
                 .isTemplate(requestOfApplicationTile.isTemplate())
                 .isActive(false)
-                .build());
+                .build();
+            TileEntitlementConfiguration.applyOverrides(applicationTile, requestOfApplicationTile.getProvider(),
+                requestOfApplicationTile.getEms3AppId(), requestOfApplicationTile.getEms3AppName(),
+                requestOfApplicationTile.getEms3Subject());
+            applicationTile = applicationTileService.create(applicationTile);
             audit(applicationTile, applicationCategory, importMap, "create");
             return ResponseEntity.ok().body(ResponseOfAdminModule.builder().result(true).data(applicationTile).build());
         } catch (RecordNotFoundException | NoSuchElementException e) {
+            ConfigurationTransactions.rollback();
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(ResponseOfAdminModule.builder().result(false).errorMessage(e.getMessage()).build());
-        } catch (RecordNotCreatedException e) {
+        } catch (RecordNotCreatedException | IllegalArgumentException e) {
+            ConfigurationTransactions.rollback();
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(ResponseOfAdminModule.builder().result(false).errorMessage(e.getMessage()).build());
         }
@@ -233,10 +262,14 @@ public class ApplicationTileController {
             .tile(tile)
             .ems2Entities(ems2Entities)
             .ems2Subject(ems2Subject)
+            .provider(applicationTile.getProvider())
+            .ems3AppId(applicationTile.getEms3AppId())
+            .ems3AppName(applicationTile.getEms3AppName())
+            .ems3Subject(applicationTile.getEms3Subject())
             .emailSupport(emailSupport)
             .isTemplate(applicationTile.isTemplate())
             .isActive(applicationTile.isActive())
-            .transactionMode(mode)
+            .transactionMode(mode.trim().toLowerCase(Locale.ROOT))
             .orderNo(applicationTile.getOrderNo())
             .build());
     }

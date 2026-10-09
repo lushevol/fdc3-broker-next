@@ -18,6 +18,10 @@ public class ApplicationTileConfig {
     private String tile;
     private String ems2Subject;
     private String ems2Entities;
+    private String provider;
+    private String ems3AppId;
+    private String ems3AppName;
+    private String ems3Subject;
     private boolean isTemplate;
     private String emailSupport;
     private long applicationCategoryId;

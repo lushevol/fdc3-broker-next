@@ -19,6 +19,10 @@ public class RequestOfApplicationTile {
     private String tile;
     private String ems2Entities;
     private String ems2Subject;
+    private String provider;
+    private String ems3AppId;
+    private String ems3AppName;
+    private String ems3Subject;
     private boolean isTemplate = false;
     private String emailSupport;
     private String mode;

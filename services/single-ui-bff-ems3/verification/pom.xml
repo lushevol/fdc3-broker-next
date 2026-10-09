@@ -51,6 +51,8 @@
                     <includes>
                         <include>com/scb/sso/singleuibff/service/v2/implementation/*</include>
                         <include>com/scb/sso/singleuibff/controller/v2/JwtAuthenticationController*</include>
+                        <include>com/scb/sso/singleuibff/util/TileEntitlementConfiguration*</include>
+                        <include>com/scb/sso/singleuibff/util/ConfigurationTransactions*</include>
                     </includes>
                     <rules><rule><element>BUNDLE</element><limits>
                         <limit><counter>LINE</counter><value>COVEREDRATIO</value><minimum>0.90</minimum></limit>

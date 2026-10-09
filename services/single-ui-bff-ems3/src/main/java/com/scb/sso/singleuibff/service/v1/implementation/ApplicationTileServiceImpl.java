@@ -7,6 +7,8 @@ import com.scb.sso.singleuibff.exceptions.RecordNotFoundException;
 import com.scb.sso.singleuibff.exceptions.RecordNotUpdatedException;
 import com.scb.sso.singleuibff.repository.ApplicationTileRepo;
 import com.scb.sso.singleuibff.service.v1.ApplicationTileService;
+import com.scb.sso.singleuibff.util.TileEntitlementConfiguration;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -59,6 +61,7 @@ public class ApplicationTileServiceImpl implements ApplicationTileService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public ApplicationTile create(ApplicationTile applicationTile) throws RecordNotCreatedException {
         try {
             if (!fmaaProperties.isCreationEnabled()) {
@@ -66,32 +69,43 @@ public class ApplicationTileServiceImpl implements ApplicationTileService {
             } else if (this.applicationTileRepo.existsById(applicationTile.getApplicationTileId())) {
                 throw RecordNotCreatedException.builder().message("Duplicate Id.").build();
             } else {
+                TileEntitlementConfiguration.validateChanges(applicationTileRepo.findAll(), List.of(applicationTile));
                 applicationTile.setApplicationTileId(this.applicationTileRepo.getApplicationTileSeq().get());
                 applicationTile.setOrderNo(applicationTile.getApplicationTileId());
                 return this.applicationTileRepo.save(applicationTile);
             }
+        } catch (IllegalArgumentException e) {
+            throw RecordNotCreatedException.builder().message(e.getMessage()).build();
         } catch (RuntimeException e) {
             throw RecordNotCreatedException.builder().message("Record not created.").build();
         }
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public ApplicationTile update(ApplicationTile applicationTile) throws RecordNotFoundException, RecordNotUpdatedException {
         try {
             if (!this.applicationTileRepo.existsById(applicationTile.getApplicationTileId())) {
                 throw RecordNotFoundException.builder().message("Id does not exists.").build();
             } else {
+                TileEntitlementConfiguration.validateChanges(applicationTileRepo.findAll(), List.of(applicationTile));
                 return this.applicationTileRepo.save(applicationTile);
             }
+        } catch (IllegalArgumentException e) {
+            throw RecordNotUpdatedException.builder().message(e.getMessage()).build();
         } catch (RuntimeException e) {
             throw RecordNotUpdatedException.builder().message("Record not updated.").build();
         }
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void saveAll(List<ApplicationTile> applicationTiles) throws RecordNotCreatedException {
         try {
+            TileEntitlementConfiguration.validateChanges(applicationTileRepo.findAll(), applicationTiles);
             this.applicationTileRepo.saveAll(applicationTiles);
+        } catch (IllegalArgumentException e) {
+            throw RecordNotCreatedException.builder().message(e.getMessage()).build();
         } catch (RuntimeException e) {
             throw RecordNotCreatedException.builder().message("Records not created.").build();
         }

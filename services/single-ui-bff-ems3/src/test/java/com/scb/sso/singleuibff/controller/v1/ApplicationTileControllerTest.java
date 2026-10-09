@@ -15,6 +15,7 @@ import com.scb.sso.singleuibff.service.v1.ImportMapService;
 import com.scb.sso.singleuibff.util.AdminModuleUtil;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -27,11 +28,18 @@ import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 
 @WebMvcTest(ApplicationTileController.class)
 public class ApplicationTileControllerTest {
+
+    @BeforeEach
+    void preserveCheckerPredicate() {
+        doAnswer(invocation -> invocation.getArgument(0) == null || invocation.getArgument(1) == null
+            ? false : invocation.callRealMethod()).when(adminModuleUtil).validateChecker(any(), any());
+    }
 
     private final String EMS2_ROLE = "FMO_ADMIN";
     @Autowired
@@ -585,10 +593,10 @@ public class ApplicationTileControllerTest {
         String response = mockMvc.perform(post("/v1/fmo/admin/tile/update")
             .content(objectMapper.writeValueAsString(requestOfApplicationTile))
             .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(MockMvcResultMatchers.status().isOk()).andReturn().getResponse().getContentAsString();
+            .andExpect(MockMvcResultMatchers.status().isBadRequest()).andReturn().getResponse().getContentAsString();
         ResponseOfAdminModule result = objectMapper.readValue(response, ResponseOfAdminModule.class);
         assertNotNull(result);
-        assertTrue(result.isResult());
+        assertFalse(result.isResult());
     }
 
     @SneakyThrows
@@ -620,10 +628,10 @@ public class ApplicationTileControllerTest {
         String response = mockMvc.perform(post("/v1/fmo/admin/tile/update")
             .content(objectMapper.writeValueAsString(requestOfApplicationTile))
             .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(MockMvcResultMatchers.status().isOk()).andReturn().getResponse().getContentAsString();
+            .andExpect(MockMvcResultMatchers.status().isBadRequest()).andReturn().getResponse().getContentAsString();
         ResponseOfAdminModule result = objectMapper.readValue(response, ResponseOfAdminModule.class);
         assertNotNull(result);
-        assertTrue(result.isResult());
+        assertFalse(result.isResult());
     }
 
     @SneakyThrows
