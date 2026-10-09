@@ -1,7 +1,9 @@
 import { RootModel } from "../../model/root";
 
+import type { LocalPortalGenerationActionType } from "../../../new-styles/local-generation-contract";
+
 export interface IAction {
-  type: ActionType;
+  type: ActionType | LocalPortalGenerationActionType;
   data: RootModel;
 }
 

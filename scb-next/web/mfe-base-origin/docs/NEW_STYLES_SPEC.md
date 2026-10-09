@@ -111,6 +111,23 @@ baseline for these adapted surfaces.
 
 - A styling-console icon is available only in development builds served on
   localhost, 127.0.0.1 or the IPv6 loopback. Production bundles exclude the console.
+- A compact **Portal style · Local** control beside the console icon switches the
+  complete Portal between Legacy and WebKit on login and in the authenticated shell.
+  It updates the existing `new-styles` URL flag, removes `new-layout`, preserves all
+  unrelated query parameters and the hash, and updates the existing appearance
+  state live so Base and federated apps use the same generation. The current
+  selection survives reloads in the URL; switching retains authentication, expiry
+  timestamps, theme preferences, workspaces and the selected tab. It neither
+  reloads the document nor refreshes/extends the authenticated session. The
+  existing layout boundary remounts remote views when generation changes; their
+  transient, unsaved UI state can reset.
+- The existing reducer only delegates to a `new-styles` appearance reducer. Its
+  local action changes the appearance flag only and is inert outside development
+  on loopback hosts. Existing actions preserve their original behavior.
+- Switching generation disables any applied console preview before changing appearance;
+  other preview settings remain available. This prevents preview CSS from masking
+  the chosen Portal style. The console's package-generation preview stays separate
+  from this complete Portal switch.
 - Implementation, switching, preview themes and temporary settings remain under
   `src/new-styles`; every UI control/icon/theme API uses public
   `ratan-design-origin` entries.

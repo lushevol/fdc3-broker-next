@@ -1,0 +1,2 @@
+export const LOCAL_PORTAL_GENERATION_ACTION = 'SET_LOCAL_PORTAL_GENERATION';
+export type LocalPortalGenerationActionType = typeof LOCAL_PORTAL_GENERATION_ACTION;

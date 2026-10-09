@@ -1,4 +1,5 @@
 import React from 'react';
+import { useContext } from '../../hooks/provider';
 import { createTheme, type Theme } from 'ratan-design-origin/theme';
 import { Console } from './Console';
 import {
@@ -15,8 +16,10 @@ import {
   type StyleSettings,
 } from './settings';
 import type { PortalStylePreview } from './contract';
+import { switchPortalGeneration, type PortalGeneration } from './portal-generation';
 
 interface Props {
+  designGeneration?: PortalGeneration;
   onPreviewChange: (preview: PortalStylePreview | null) => void;
 }
 
@@ -28,7 +31,8 @@ function sessionStorageOrNull(): Storage | null {
   }
 }
 
-function LocalConsole({ onPreviewChange }: Props) {
+function LocalConsole({ onPreviewChange, designGeneration = 'legacy' }: Props) {
+  const [, dispatch] = useContext();
   const [settings, setSettings] = React.useState(() => {
     const storage = sessionStorageOrNull();
     return storage ? readStyleSettings(storage) : DEFAULT_STYLE_SETTINGS;
@@ -73,6 +77,20 @@ function LocalConsole({ onPreviewChange }: Props) {
   return (
     <Console
       settings={settings}
+      portalGeneration={{
+        value: designGeneration,
+        onChange: (generation) => {
+          onPreviewChange(null);
+          setSettings(
+            switchPortalGeneration(generation, settings, {
+              href: window.location.href,
+              history: window.history,
+              dispatch,
+              storage: sessionStorageOrNull(),
+            }),
+          );
+        },
+      }}
       onChange={onChange}
       onReset={() => setSettings(DEFAULT_STYLE_SETTINGS)}
     />
@@ -80,5 +98,7 @@ function LocalConsole({ onPreviewChange }: Props) {
 }
 
 export default function StyleConsoleBoundary(props: Props) {
-  return isLocalStylingConsole(true, window.location.hostname) ? <LocalConsole {...props} /> : null;
+  return isLocalStylingConsole(import.meta.env.DEV, window.location.hostname) ? (
+    <LocalConsole {...props} />
+  ) : null;
 }

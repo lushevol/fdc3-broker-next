@@ -15,6 +15,7 @@ import { createRatanTheme, styled } from 'ratan-design-origin/theme';
 import { createStylePreviewTheme, createStylePreviewVariables } from './preview-theme';
 import { DEFAULT_STYLE_SETTINGS, STYLE_FONTS, STYLE_LIMITS, type StyleSettings } from './settings';
 import { consoleUiTokens as ui } from './ui-tokens';
+import { PortalGenerationSwitch, type PortalGenerationControl } from './PortalGenerationSwitch';
 
 const EDITOR_THEME = createRatanTheme({ mode: 'light', designGeneration: 'webkit' });
 const COLOR_HEX = /^#[0-9a-f]{6}$/i;
@@ -43,6 +44,7 @@ const fieldRowStyles = {
 };
 
 export interface ConsoleProps {
+  portalGeneration?: PortalGenerationControl;
   settings: StyleSettings;
   onChange: (patch: Partial<StyleSettings>) => void;
   onReset: () => void;
@@ -259,7 +261,7 @@ function PackagePreview({ settings }: { settings: StyleSettings }) {
   );
 }
 
-export function Console({ settings, onChange, onReset }: ConsoleProps) {
+export function Console({ settings, onChange, onReset, portalGeneration }: ConsoleProps) {
   const [open, setOpen] = React.useState(false);
   const triggerRef = React.useRef<HTMLButtonElement>(null);
   const [resetRevision, setResetRevision] = React.useState(0);
@@ -268,6 +270,7 @@ export function Console({ settings, onChange, onReset }: ConsoleProps) {
   React.useEffect(() => setColorText(settings.primaryColor), [settings.primaryColor]);
   return (
     <EditorProvider baseTheme={EDITOR_THEME} mode="light" designGeneration="webkit">
+      {portalGeneration && !open && <PortalGenerationSwitch {...portalGeneration} />}
       <Tooltip title="Styling console" placement="left">
         <IconButton
           ref={triggerRef}

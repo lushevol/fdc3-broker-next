@@ -46,7 +46,10 @@ const Theme: React.FC<ComponentPropsDefault> = (props): ReactElement => {
       {props.children}
       {DevelopmentConsole && (
         <React.Suspense fallback={null}>
-          <DevelopmentConsole onPreviewChange={setPreview} />
+          <DevelopmentConsole
+            onPreviewChange={setPreview}
+            designGeneration={store.newStyles ? 'webkit' : 'legacy'}
+          />
         </React.Suspense>
       )}
     </ThemeProvider>
