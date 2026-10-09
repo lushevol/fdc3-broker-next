@@ -120,6 +120,7 @@ npm run test --workspace ratan-design-origin -- --maxWorkers=2
 npm run typecheck --workspace ratan-design-origin
 npm run lint --workspace ratan-design-origin
 npm run build:packages
+npm run verify:tree-shaking --workspace ratan-design-origin
 npm run build:storybook --workspace ratan-design-origin
 npm run verify:package --workspace ratan-design-origin
 npm run test:dependency-isolation
@@ -286,10 +287,12 @@ Keep the printed fixture/log path with release evidence. Ordinary package builds
 use committed WebKit 2.0.5 assets; tokens:generate additionally needs the canonical
 source build and updates source hashes. Review NOTICE.md before distributing fonts.
 
-The Button-only tree-shaking gate pins Vite 8.2.1 and externalizes React,
-ReactDOM, MUI Material/icons and Emotion. It permits only rendered `Button.js`,
-rejects unrelated package markers/modules, and enforces 2,048 uncompressed bytes.
-The RD-021 reference improved from 21,935 to 427 bytes. Treat this as package-code
+The packed-consumer tree-shaking gate pins Vite 8.2.1 and externalizes UI peers.
+It verifies all 30 direct subpaths against their required package module graphs,
+no-import/type-only runtime exclusion, unused root import elimination and explicit
+CSS/font retention. The root Button case permits only rendered `Button.js`,
+rejects unrelated package markers/modules, and enforces 2,048 uncompressed bytes;
+the direct Button case also loads only that module. Treat this as package-code
 evidence for that import boundary, not an application bundle or transfer-size
 claim; a budget increase requires a reviewed public Button contract change.
 
@@ -329,6 +332,13 @@ Changing MUI/Emotion federation sharing is a separate rollout decision.
 Base/Ratan/Cashflow adapters preserve existing imports, so new callers can adopt
 named package exports incrementally. Do not remove compatible Base paths or
 typos without deprecation notes, consumer evidence and a breaking release.
+
+For new direct consumers, prefer component subpaths such as
+`ratan-design-origin/button` over the root barrel when compilation isolation
+matters. The root remains compatible and tree-shakes unused final code, while
+direct paths skip unrelated package module traversal. Keep optional integrations
+explicit and load stylesheets intentionally. Library builds produce all public
+entries; consumer import choices determine which modules their bundler processes.
 
 ## Reproducible Candidate and Rollout
 

@@ -6,7 +6,7 @@ import DialogActions, { type DialogActionsProps } from "@mui/material/DialogActi
 import IconButton from "@mui/material/IconButton";
 import { Close } from "@mui/icons-material";
 import { useTheme } from "@mui/material/styles";
-import { OverlayContainerContext } from "./Provider.js";
+import { OverlayContainerContext } from "./overlay-context.js";
 
 export interface DialogProps extends MuiDialogProps {
   titleComponents?: React.ReactNode;

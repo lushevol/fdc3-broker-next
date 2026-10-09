@@ -1,4 +1,8 @@
-import { expect, test } from './browser-test';
+import { mergeTests } from '@playwright/test';
+import { expect, test as browserTest } from './browser-test';
+import { test as profileImageTest } from './base-ui-parity.fixture';
+
+const test = mergeTests(browserTest, profileImageTest);
 
 test.skip(!!process.env.PLAYWRIGHT_PRODUCTION_EDGE, 'Uses the development login fixtures');
 
@@ -15,7 +19,10 @@ test('host can render and remove a tile after the control extraction', async ({ 
   await expect(page.locator('html')).toContainClass('dark sc-mode-dark ratan-design-root');
   await expect(page.locator('html')).toHaveAttribute('data-generation', 'webkit');
   await expect(page.locator('html')).toHaveAttribute('data-mode', 'dark');
-  const appearanceRoots = page.locator('.ratan-design-root:not(html)');
+  // The local console editor keeps its own light theme while the host is dark.
+  const appearanceRoots = page.locator('.ratan-design-root:not(html)').filter({
+    hasNot: page.getByRole('button', { name: 'Styling console', exact: true }),
+  });
   expect(await appearanceRoots.count()).toBeGreaterThanOrEqual(2);
   expect(
     await appearanceRoots.evaluateAll((roots) =>

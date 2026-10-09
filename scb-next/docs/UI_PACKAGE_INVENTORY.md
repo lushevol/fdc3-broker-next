@@ -24,6 +24,13 @@ controls, primitives, icons, theme APIs and `styles-and-tokens.css`; authenticat
 analytics, persistence and workspace lifecycle remain host responsibilities.
 See the [Portal specification](../web/mfe-base-origin/docs/NEW_STYLES_SPEC.md).
 
+The existing entries remain supported. New consumers can use the 30 direct
+component/provider/appearance paths documented in the package README, for example
+`ratan-design-origin/button` and `ratan-design-origin/date-picker`, to avoid
+compiling unrelated package modules. Root named imports still remove unused
+runtime code from production bundles. CSS/fonts require an explicit stylesheet
+import; producer package builds emit every supported module for distribution.
+
 | Original surface | Maintained presentation | Host responsibility |
 | --- | --- | --- |
 | Theme controls/tokens and CSS aliases | Core/theme/tokens/compatibility entries | Auth-based mode, persistence, document classes, explicit CSS loading |

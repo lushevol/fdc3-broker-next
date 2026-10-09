@@ -1,8 +1,8 @@
 import React from "react";
 import { KeyboardArrowDown as KeyboardArrowDownIcon } from "@mui/icons-material";
-import MuiMenuItem, { type MenuItemProps } from "@mui/material/MenuItem";
 import MuiSelect, { type SelectProps as MuiSelectProps } from "@mui/material/Select";
 import { styled } from "@mui/material/styles";
+import { LabelMenuItem } from "./LabelMenuItem.js";
 
 export interface LabelProps extends Omit<MuiSelectProps, "variant"> {
   variant?: "standard" | "outlined" | "filled";
@@ -29,15 +29,6 @@ const Root = /*#__PURE__*/ styled(MuiSelect)(({ theme }) => ({
     marginLeft: "-8px",
   },
 }));
-
-const LabelMenuItemRoot = /*#__PURE__*/ styled(MuiMenuItem)({ minWidth: "263px" });
-
-export const LabelMenuItem = /*#__PURE__*/ React.forwardRef<
-  HTMLLIElement,
-  MenuItemProps
->(function LabelMenuItem(props, ref) {
-  return <LabelMenuItemRoot {...props} ref={ref} />;
-});
 
 export function Label({
   variant: _variant,
