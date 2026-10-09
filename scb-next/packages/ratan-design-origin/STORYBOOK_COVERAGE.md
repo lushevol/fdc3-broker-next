@@ -193,3 +193,12 @@ Reproduce with the package typecheck/lint/test/build commands, followed by
 independent consumer checks and existing screenshot comparisons. Catalog inventory
 checks establish source usage; the browser assertions establish the specific
 rendered states and interactions exercised above.
+
+## Validation evidence — 9 October 2026
+
+The package catalog builds with 158 stories. The public-export guard covers all
+24 curated icons, including the three profile icons, and the new migration
+String Class Facade example compiles. The three catalog verifier tests pass.
+The browser acceptance for the copied original-runtime Base is recorded in
+`scb/web/mfe-base/docs/ACCEPTANCE.md`; the earlier catalog browser evidence above
+retains its original scope.

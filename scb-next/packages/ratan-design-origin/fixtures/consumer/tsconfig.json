@@ -7,15 +7,22 @@
     "strict": true,
     "skipLibCheck": false,
     "esModuleInterop": true,
-    "lib": ["ES2022", "DOM", "DOM.Iterable"]
+    "lib": [
+      "ES2022",
+      "DOM",
+      "DOM.Iterable"
+    ]
   },
-  "include": ["src"],
+  "include": [
+    "src"
+  ],
   "exclude": [
     "src/date-subpaths.ts",
     "src/dates-browser.tsx",
     "src/dates.tsx",
     "src/portal-browser.tsx",
     "src/server-dates.tsx",
-    "src/server-portal.tsx"
+    "src/server-portal.tsx",
+    "src/server-compatibility-css.ts"
   ]
 }

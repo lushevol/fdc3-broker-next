@@ -101,3 +101,10 @@ New standalone surfaces use core themes and semantic tokens.
 
 See UI_PACKAGE_IMPLEMENTATION.md for specifications, tests and known baseline
 limitations; UI_PACKAGE_RELEASE.md defines contribution and rollout policy.
+
+The optional `ratan-design-origin/compatibility-css` entry exposes `stringCss`
+for existing Base class-name generators. It requires the host's declared
+`@emotion/css` peer and stays isolated from the core and the other compatibility
+entries. New presentation uses package `styled` or component `sx`; this facade
+preserves existing string class and tagged-template contracts during the SCB
+Webpack/Single-SPA backport.

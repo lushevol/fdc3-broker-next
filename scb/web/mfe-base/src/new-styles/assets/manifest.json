@@ -1,0 +1,467 @@
+{
+  "schemaVersion": 1,
+  "preparedDate": "2026-10-05",
+  "referenceViewport": {
+    "width": 1512,
+    "height": 982,
+    "deviceScaleFactor": 1
+  },
+  "coordinateSystem": "source PNG native pixels; crop [left, top, width, height], right/bottom exclusive",
+  "assetDirectory": "scb-next/web/mfe-base-origin/src/new-styles/assets",
+  "restrictions": [
+    "Decorative regions only; interactive controls and text must be real UI.",
+    "Incomplete fragments must not be presented as complete backgrounds or tiled/stretched to claim 1:1 fidelity.",
+    "Source crops preserve opaque raster backing. No transparency has been invented and no missing pixels reconstructed.",
+    "Portrait is reference-fixture-only. Production photos continue to come from identity APIs.",
+    "Native-size fidelity only. Larger or theme-adapted compositions need original clean exports or documented adaptations."
+  ],
+  "sources": {
+    "Frame-04-Home-Page-Light.png": {
+      "path": "scb-next/web/mfe-base-origin/docs/new-styles-prototypes/Frame-04-Home-Page-Light.png",
+      "sha256": "1f4610bd6622ab9e13a2dca95b67d8e70716aeb533cb3ec2a593b34b84ed7648",
+      "width": 1512,
+      "height": 982
+    },
+    "Frame-05-Cashflow-Blotter-Page-Dark.png": {
+      "path": "scb-next/web/mfe-base-origin/docs/new-styles-prototypes/Frame-05-Cashflow-Blotter-Page-Dark.png",
+      "sha256": "44bc5f0058efc3c7627aa8ef6807ea02abe9a7e4e95f9419726b36674f6add70",
+      "width": 1512,
+      "height": 982
+    },
+    "Frame-06-Cashflow-Blotter-Page-Dark-2.png": {
+      "path": "scb-next/web/mfe-base-origin/docs/new-styles-prototypes/Frame-06-Cashflow-Blotter-Page-Dark-2.png",
+      "sha256": "728fdef6adb1ae35d11e16d64d9536d8c92c91fd22b41ca75b670405305ef1aa",
+      "width": 1512,
+      "height": 982
+    },
+    "Frame-07-Home-Page-Light-2.png": {
+      "path": "scb-next/web/mfe-base-origin/docs/new-styles-prototypes/Frame-07-Home-Page-Light-2.png",
+      "sha256": "aaeee5dd37503127d9f573504f28906253c4ab34d25b0d2e7cc1f5396d1da290",
+      "width": 1512,
+      "height": 982
+    },
+    "Frame-08-Home-Page-Light-3.png": {
+      "path": "scb-next/web/mfe-base-origin/docs/new-styles-prototypes/Frame-08-Home-Page-Light-3.png",
+      "sha256": "2fe20fa27a92b73d1a36545743700a95ced1edc6888d0654e4e008ec4b0d293f",
+      "width": 1512,
+      "height": 982
+    },
+    "Frame-09-Home-Page-Light-4.png": {
+      "path": "scb-next/web/mfe-base-origin/docs/new-styles-prototypes/Frame-09-Home-Page-Light-4.png",
+      "sha256": "33956a1f487d01afcbc4fa39f921210799fea597a7e60fb05070b38e8ed01bbe",
+      "width": 1512,
+      "height": 982
+    },
+    "Frame-10-Home-Page-Light-5.png": {
+      "path": "scb-next/web/mfe-base-origin/docs/new-styles-prototypes/Frame-10-Home-Page-Light-5.png",
+      "sha256": "6f58e8eb1c3ba482743f617c6706e2d4824135f3389b6acc5165c1868b0ec5a4",
+      "width": 1512,
+      "height": 982
+    },
+    "Frame-11-Login-Page.png": {
+      "path": "scb-next/web/mfe-base-origin/docs/new-styles-prototypes/Frame-11-Login-Page.png",
+      "sha256": "8ecc4e70c5f330e1f8dd41081890bb2021643f1941a77a85aad5df94c7bf4838",
+      "width": 1512,
+      "height": 982
+    },
+    "Frame-13-Home-Page-Dark.png": {
+      "path": "scb-next/web/mfe-base-origin/docs/new-styles-prototypes/Frame-13-Home-Page-Dark.png",
+      "sha256": "723bd8a214b732299c0bcc114b2f8881fbc6ea3001b86424405a6ec9e1f65974",
+      "width": 1512,
+      "height": 982
+    },
+    "Frame-14-Home-Page-Dark-2.png": {
+      "path": "scb-next/web/mfe-base-origin/docs/new-styles-prototypes/Frame-14-Home-Page-Dark-2.png",
+      "sha256": "f09d5689fe7ba4aaaeaeacacee4bb84e54a145a34f2ed3814f00e4e508088138",
+      "width": 1512,
+      "height": 982
+    },
+    "Frame-15-Home-Page-Dark-4.png": {
+      "path": "scb-next/web/mfe-base-origin/docs/new-styles-prototypes/Frame-15-Home-Page-Dark-4.png",
+      "sha256": "538607ffd91360b898bdc5924c30d1b457e0de01a377b8be99174933611bcee9",
+      "width": 1512,
+      "height": 982
+    },
+    "Frame-16-Home-Page-Dark-5.png": {
+      "path": "scb-next/web/mfe-base-origin/docs/new-styles-prototypes/Frame-16-Home-Page-Dark-5.png",
+      "sha256": "0744667a44ac75504faab684d8e834c67ff8e6f78639eaf8c47c247963570877",
+      "width": 1512,
+      "height": 982
+    },
+    "Frame-17-Home-Page-2-Dark.png": {
+      "path": "scb-next/web/mfe-base-origin/docs/new-styles-prototypes/Frame-17-Home-Page-2-Dark.png",
+      "sha256": "0bee06eca9628504e6d808457d01ff17a9ac4f4be29f001c83a5baca109b21a3",
+      "width": 1512,
+      "height": 982
+    },
+    "Frame-18-Home-Page-2-Light.png": {
+      "path": "scb-next/web/mfe-base-origin/docs/new-styles-prototypes/Frame-18-Home-Page-2-Light.png",
+      "sha256": "c902248d0225546d24b17bbd73c8e0e240cb2f6a84ac0d5a96a2ec0651407ff8",
+      "width": 1512,
+      "height": 982
+    }
+  },
+  "reused": [
+    {
+      "file": "scb-next/web/mfe-base-origin/src/components/AppBar/mo1_logo_light.svg",
+      "role": "mo1-logo-light-surface",
+      "note": "Colored icon; dark wordmark. Existing vector reused for light login surfaces. SVG embeds a raster brand icon; wordmark paths are vector.",
+      "sha256": "4d9bbe9726210e04c71e128d84a746c38f87bb4bab49acf7bd5e9aba34ad5c36",
+      "width": 1411,
+      "height": 233,
+      "hasAlpha": true
+    },
+    {
+      "file": "scb-next/web/mfe-base-origin/src/components/AppBar/mo1_logo_dark.svg",
+      "role": "mo1-logo-navy-surface",
+      "note": "Colored icon; white wordmark. Existing vector reused for branded navy shell and hero surfaces. SVG embeds a raster brand icon; wordmark paths are vector.",
+      "sha256": "fe1a94612b7fb61a8a3d0120d027a916fc338838775b4a56869d66c1d3676620",
+      "width": 1411,
+      "height": 233,
+      "hasAlpha": true
+    },
+    {
+      "file": "scb-next/web/mfe-base-origin/src/theme/config/background-light.png",
+      "role": "shell-gradient-navy",
+      "note": "Existing 5600×384 navy gradient. Filename refers to legacy mapping; both prototype shell themes remain navy. Dark prototype tint needs semantic theme adaptation.",
+      "sha256": "792450ddf8dafb216ac99ce39d020d822365beab861a98d8031bdc1671817021",
+      "width": 5600,
+      "height": 384,
+      "hasAlpha": true
+    },
+    {
+      "file": "scb-next/web/mfe-base-origin/src/theme/config/pattern.png",
+      "role": "shell-dashed-edge",
+      "note": "Existing transparent 428×536 dashed motif. Reuse at native aspect ratio, mirrored/cropped at shell edges as already supported.",
+      "sha256": "c9dcb973e011de7588341611ee65fe511adfc771a664d7b02ad4272f78b7e026",
+      "width": 428,
+      "height": 536,
+      "hasAlpha": true
+    },
+    {
+      "file": "scb-next/packages/ratan-design-origin/assets/fonts/SCProsperSans-Regular.woff2",
+      "role": "font-regular",
+      "note": "Existing design-system font. Raster references provide no font metadata; must verify loaded production URLs before locking type metrics.",
+      "sha256": "325d1474a2d2575c6171c695f9132581c90527de659bb5a7a5f27bf53cd2941b"
+    },
+    {
+      "file": "scb-next/packages/ratan-design-origin/assets/fonts/SCProsperSans-Medium.woff2",
+      "role": "font-medium",
+      "note": "Existing design-system font. Raster references provide no font metadata; must verify loaded production URLs before locking type metrics.",
+      "sha256": "f5479f1e463f33b519c8d45f7a033ddf08e29f4230a91207c2f03eb1804affc4"
+    },
+    {
+      "file": "scb-next/packages/ratan-design-origin/assets/fonts/SCProsperSans-Bold.woff2",
+      "role": "font-bold",
+      "note": "Existing design-system font. Raster references provide no font metadata; must verify loaded production URLs before locking type metrics.",
+      "sha256": "ce475dd4f8dee1e7610e96610125b07d715ebef3a7c2d15b46ba51f962ecf99b"
+    }
+  ],
+  "assets": [
+    {
+      "file": "login-hero-light-top.png",
+      "source": "Frame-11-Login-Page.png",
+      "crop": [690, 0, 822, 736],
+      "role": "login-hero",
+      "theme": "light-reference",
+      "complete": false,
+      "note": "Unobscured top 736 pixels of the 822×982 hero. Bottom 246 pixels cannot be recovered because heading and body text cover the artwork. No dark login supplied.",
+      "width": 822,
+      "height": 736,
+      "hasAlpha": true,
+      "sha256": "42a3fab5a71d8128e6c54801f1f57ebf5d1767baaf38661c2c17c1e9af83dda1",
+      "rawSha256": "16ad5928eb428cc03b4081c75663f550eb55e54ddb217b33c0f2cd07baf4735b",
+      "sourceSha256": "8ecc4e70c5f330e1f8dd41081890bb2021643f1941a77a85aad5df94c7bf4838",
+      "verification": "exact decoded pixel equality with source crop; no resize, masking, recoloring, retouching, or inferred pixels"
+    },
+    {
+      "file": "empty-workspace-dark.png",
+      "source": "Frame-04-Home-Page-Light.png",
+      "crop": [450, 180, 624, 452],
+      "role": "empty-illustration",
+      "theme": "dark",
+      "complete": true,
+      "note": "Complete illustration and shadow on its opaque #1a1a1a prototype workspace backing. No transparent or light counterpart supplied. Crop includes native surrounding space.",
+      "width": 624,
+      "height": 452,
+      "hasAlpha": true,
+      "sha256": "09ac36f6bb8e442f60556451fc56292733ff03464a3f38e16a1d4c10885f0133",
+      "rawSha256": "cecc1b8b9e7da7ba036971bb6fdb6d85697babda2d4646b12d8c84c39f75db25",
+      "sourceSha256": "1f4610bd6622ab9e13a2dca95b67d8e70716aeb533cb3ec2a593b34b84ed7648",
+      "verification": "exact decoded pixel equality with source crop; no resize, masking, recoloring, retouching, or inferred pixels"
+    },
+    {
+      "file": "profile-portrait-reference.png",
+      "source": "Frame-08-Home-Page-Light-3.png",
+      "crop": [382, 314, 118, 120],
+      "role": "portrait-fixture",
+      "theme": "light-reference",
+      "complete": true,
+      "fixtureOnly": true,
+      "note": "Reference photo plus baked circular border and outside-corner banner/body pixels. Use as a visual fixture with circular clipping; never as production identity.",
+      "width": 118,
+      "height": 120,
+      "hasAlpha": true,
+      "sha256": "5039dff5791e2389c29a57a81481a73dcabfbe1aa568d855c782c6461ebf14e7",
+      "rawSha256": "3d07187f2c4ec94eafeb676822ac37500d62d93e00ad493a0160a224604747b5",
+      "sourceSha256": "2fe20fa27a92b73d1a36545743700a95ced1edc6888d0654e4e008ec4b0d293f",
+      "verification": "exact decoded pixel equality with source crop; no resize, masking, recoloring, retouching, or inferred pixels"
+    },
+    {
+      "file": "profile-banner-light-center.png",
+      "source": "Frame-08-Home-Page-Light-3.png",
+      "crop": [356, 242, 800, 72],
+      "role": "profile-banner-detail",
+      "theme": "light",
+      "complete": false,
+      "note": "Full-width unobscured band, relative banner offset (0,39). Complete 800×156 banner cannot be recovered: title/close occupy top and portrait covers lower-left.",
+      "width": 800,
+      "height": 72,
+      "hasAlpha": true,
+      "sha256": "2b84a07c5a8575d51f93a4ee84220c46afbb27f9523b1f7fc9c9dbf20edb0a66",
+      "rawSha256": "d9e1d7b0cca74fddafd7fce4de60dfc48e5b62b6208c225ac51775d51f0eab4d",
+      "sourceSha256": "2fe20fa27a92b73d1a36545743700a95ced1edc6888d0654e4e008ec4b0d293f",
+      "verification": "exact decoded pixel equality with source crop; no resize, masking, recoloring, retouching, or inferred pixels"
+    },
+    {
+      "file": "profile-banner-light-lower-right.png",
+      "source": "Frame-08-Home-Page-Light-3.png",
+      "crop": [500, 242, 656, 117],
+      "role": "profile-banner-detail",
+      "theme": "light",
+      "complete": false,
+      "note": "Unobscured lower-right rectangle, relative banner offset (144,39). Preserve native alignment for this detail; stretching/repeating cannot reproduce complete reference.",
+      "width": 656,
+      "height": 117,
+      "hasAlpha": true,
+      "sha256": "f422beb537a202beace1c87ad519df8d3f048742cdadda91b500bec6924cf852",
+      "rawSha256": "7666fa2460fdd835f14da2eb37706d0a1c412ae1d8eefe5bcfb70aabd6d2eeb1",
+      "sourceSha256": "2fe20fa27a92b73d1a36545743700a95ced1edc6888d0654e4e008ec4b0d293f",
+      "verification": "exact decoded pixel equality with source crop; no resize, masking, recoloring, retouching, or inferred pixels"
+    },
+    {
+      "file": "profile-banner-dark-center.png",
+      "source": "Frame-14-Home-Page-Dark-2.png",
+      "crop": [356, 242, 800, 72],
+      "role": "profile-banner-detail",
+      "theme": "dark",
+      "complete": false,
+      "note": "Full-width unobscured band, relative banner offset (0,39). Complete 800×156 banner cannot be recovered: title/close occupy top and portrait covers lower-left.",
+      "width": 800,
+      "height": 72,
+      "hasAlpha": true,
+      "sha256": "5335c039b876737c4d731a8d527b4afb3f53f94803b28df2a80bab5001fca09b",
+      "rawSha256": "3db8cf2e6cdf2fbe6c0ecc0ae1b5702196f108bb7b32fd106929e8afcfbaa2e8",
+      "sourceSha256": "f09d5689fe7ba4aaaeaeacacee4bb84e54a145a34f2ed3814f00e4e508088138",
+      "verification": "exact decoded pixel equality with source crop; no resize, masking, recoloring, retouching, or inferred pixels"
+    },
+    {
+      "file": "profile-banner-dark-lower-right.png",
+      "source": "Frame-14-Home-Page-Dark-2.png",
+      "crop": [500, 242, 656, 117],
+      "role": "profile-banner-detail",
+      "theme": "dark",
+      "complete": false,
+      "note": "Unobscured lower-right rectangle, relative banner offset (144,39). Preserve native alignment for this detail; stretching/repeating cannot reproduce complete reference.",
+      "width": 656,
+      "height": 117,
+      "hasAlpha": true,
+      "sha256": "a68c10e5b2dc9822983f64dc89288ff04371e3d76f4ac63aa5d9fd3de32e2490",
+      "rawSha256": "c5c020bcfd783adf40a37580e27d012aeeca23c8d6588fe758170fc271b3b3c9",
+      "sourceSha256": "f09d5689fe7ba4aaaeaeacacee4bb84e54a145a34f2ed3814f00e4e508088138",
+      "verification": "exact decoded pixel equality with source crop; no resize, masking, recoloring, retouching, or inferred pixels"
+    },
+    {
+      "file": "drawer-pattern-light-upper-right.png",
+      "source": "Frame-18-Home-Page-2-Light.png",
+      "crop": [912, 154, 588, 290],
+      "role": "drawer-background-detail",
+      "theme": "light",
+      "complete": false,
+      "note": "Unobscured region at drawer-body offset (295,0). Complete 883×828 body artwork is obscured by categories/cards. Excludes scrollbar.",
+      "width": 588,
+      "height": 290,
+      "hasAlpha": true,
+      "sha256": "706671d0b0ffe07faa49eadc4a25482fd58cd8fcba1d8ecf570efe510b491a61",
+      "rawSha256": "6f10832d0ca7f70ac8ff62ab71e9acf6c32413dc5aa2bab8844804c546a496e3",
+      "sourceSha256": "c902248d0225546d24b17bbd73c8e0e240cb2f6a84ac0d5a96a2ec0651407ff8",
+      "verification": "exact decoded pixel equality with source crop; no resize, masking, recoloring, retouching, or inferred pixels"
+    },
+    {
+      "file": "drawer-pattern-light-lower-right.png",
+      "source": "Frame-18-Home-Page-2-Light.png",
+      "crop": [1190, 760, 310, 222],
+      "role": "drawer-background-detail",
+      "theme": "light",
+      "complete": false,
+      "note": "Unobscured region at drawer-body offset (573,606). Includes no card/content; no repeating tile exists in source.",
+      "width": 310,
+      "height": 222,
+      "hasAlpha": true,
+      "sha256": "4d645ac2287d650f20a1b1418afea65e4e34aeaa96108deac639502a1737d14a",
+      "rawSha256": "e37274901fd73bc461259a5b3c85a32d9d83d57f79b6160277fcd81884b3bb62",
+      "sourceSha256": "c902248d0225546d24b17bbd73c8e0e240cb2f6a84ac0d5a96a2ec0651407ff8",
+      "verification": "exact decoded pixel equality with source crop; no resize, masking, recoloring, retouching, or inferred pixels"
+    },
+    {
+      "file": "tile-chevron-light.png",
+      "source": "Frame-18-Home-Page-2-Light.png",
+      "crop": [760, 302, 152, 75],
+      "role": "tile-pattern",
+      "theme": "light",
+      "complete": true,
+      "note": "Complete visible chevron motif from Trade Blotter card, on opaque theme card backing. Place bottom-right at native 152×75; card border/action/title excluded.",
+      "width": 152,
+      "height": 75,
+      "hasAlpha": true,
+      "sha256": "51a64d2adf1a6654cdbc94076e1d3e8bedd9af0414428a2d718c3cf1cf6d1b0b",
+      "rawSha256": "42cda4045b4c74e2b1ecb1533eda234bc041b7d2a79c2810051657ea506ee36c",
+      "sourceSha256": "c902248d0225546d24b17bbd73c8e0e240cb2f6a84ac0d5a96a2ec0651407ff8",
+      "verification": "exact decoded pixel equality with source crop; no resize, masking, recoloring, retouching, or inferred pixels"
+    },
+    {
+      "file": "tile-wave-light.png",
+      "source": "Frame-18-Home-Page-2-Light.png",
+      "crop": [782, 451, 123, 140],
+      "role": "tile-pattern-detail",
+      "theme": "light",
+      "complete": false,
+      "note": "Unobscured wave motif detail from Cashflow [FX & Equity], on opaque card backing. Last 7 right/top motif pixels and rounded corner excluded; full pattern needs original export.",
+      "width": 123,
+      "height": 140,
+      "hasAlpha": true,
+      "sha256": "162c4a3c9c21ba249a5613f47882504babf4696ac10ab5f2c67d82370123ea43",
+      "rawSha256": "aae092322ea83e0212666ed24af9cecc3b7e1013192eb9fb652467e182c3934c",
+      "sourceSha256": "c902248d0225546d24b17bbd73c8e0e240cb2f6a84ac0d5a96a2ec0651407ff8",
+      "verification": "exact decoded pixel equality with source crop; no resize, masking, recoloring, retouching, or inferred pixels"
+    },
+    {
+      "file": "tile-dots-light.png",
+      "source": "Frame-18-Home-Page-2-Light.png",
+      "crop": [1094, 451, 89, 140],
+      "role": "tile-pattern-detail",
+      "theme": "light",
+      "complete": false,
+      "note": "Unobscured dotted motif detail from Cashflow [Open Search], on opaque card backing. Top and right 7 pixels excluded to avoid baked rounded corners; full pattern needs original export.",
+      "width": 89,
+      "height": 140,
+      "hasAlpha": true,
+      "sha256": "3d6219eb8f03ffa6f130eb055de9757a1b500fd3b282fe7c474cc4e2bfb730c3",
+      "rawSha256": "3bff0bd5ac17e7ea5028aa24e235eb451a7cb433ae8ecd155dcc00295bd7aa21",
+      "sourceSha256": "c902248d0225546d24b17bbd73c8e0e240cb2f6a84ac0d5a96a2ec0651407ff8",
+      "verification": "exact decoded pixel equality with source crop; no resize, masking, recoloring, retouching, or inferred pixels"
+    },
+    {
+      "file": "tile-rings-light-upper.png",
+      "source": "Frame-18-Home-Page-2-Light.png",
+      "crop": [817, 617, 88, 92],
+      "role": "tile-pattern-detail",
+      "theme": "light",
+      "complete": false,
+      "note": "Unobscured upper arc fragment from Group Blotter. Lower arc is covered by location controls; title/action pixels excluded. Original export needed for complete ring artwork.",
+      "width": 88,
+      "height": 92,
+      "hasAlpha": true,
+      "sha256": "c61e3474203c48519a58da5494df561bc55967c6a99390ce42ef51c7afb00761",
+      "rawSha256": "95dd83b8c227d192c63b787a8d490594bdeac88ccd76229028a0a921a4690635",
+      "sourceSha256": "c902248d0225546d24b17bbd73c8e0e240cb2f6a84ac0d5a96a2ec0651407ff8",
+      "verification": "exact decoded pixel equality with source crop; no resize, masking, recoloring, retouching, or inferred pixels"
+    },
+    {
+      "file": "drawer-pattern-dark-upper-right.png",
+      "source": "Frame-17-Home-Page-2-Dark.png",
+      "crop": [912, 154, 588, 290],
+      "role": "drawer-background-detail",
+      "theme": "dark",
+      "complete": false,
+      "note": "Unobscured region at drawer-body offset (295,0). Complete 883×828 body artwork is obscured by categories/cards. Excludes scrollbar.",
+      "width": 588,
+      "height": 290,
+      "hasAlpha": true,
+      "sha256": "ef1383deeb75470e655fca2c5d8511362e434e1039bc4303789be04a43ac7bb3",
+      "rawSha256": "e53f8eaea4b0469dbad829d0392bd70dfa8b8c6330be814d82e34a3c47d2af0b",
+      "sourceSha256": "0bee06eca9628504e6d808457d01ff17a9ac4f4be29f001c83a5baca109b21a3",
+      "verification": "exact decoded pixel equality with source crop; no resize, masking, recoloring, retouching, or inferred pixels"
+    },
+    {
+      "file": "drawer-pattern-dark-lower-right.png",
+      "source": "Frame-17-Home-Page-2-Dark.png",
+      "crop": [1190, 760, 310, 222],
+      "role": "drawer-background-detail",
+      "theme": "dark",
+      "complete": false,
+      "note": "Unobscured region at drawer-body offset (573,606). Includes no card/content; no repeating tile exists in source.",
+      "width": 310,
+      "height": 222,
+      "hasAlpha": true,
+      "sha256": "80f718494b1890e845a19ab36299d22a2c6fb77a3f9ba2dc5e4c22d39ea0fe46",
+      "rawSha256": "534169e1afed8aa404a97646ed3c32cd9774a0598a53c140650558138efe8628",
+      "sourceSha256": "0bee06eca9628504e6d808457d01ff17a9ac4f4be29f001c83a5baca109b21a3",
+      "verification": "exact decoded pixel equality with source crop; no resize, masking, recoloring, retouching, or inferred pixels"
+    },
+    {
+      "file": "tile-chevron-dark.png",
+      "source": "Frame-17-Home-Page-2-Dark.png",
+      "crop": [760, 302, 152, 75],
+      "role": "tile-pattern",
+      "theme": "dark",
+      "complete": true,
+      "note": "Complete visible chevron motif from Trade Blotter card, on opaque theme card backing. Place bottom-right at native 152×75; card border/action/title excluded.",
+      "width": 152,
+      "height": 75,
+      "hasAlpha": true,
+      "sha256": "874876b35c3c336ec5974e9db5ebfcd254029e6d99a8522b40f257d58783cf25",
+      "rawSha256": "b8de646835c00ab352d2e43d093c7e8a3af6ef4b883a1570f581ce377d723013",
+      "sourceSha256": "0bee06eca9628504e6d808457d01ff17a9ac4f4be29f001c83a5baca109b21a3",
+      "verification": "exact decoded pixel equality with source crop; no resize, masking, recoloring, retouching, or inferred pixels"
+    },
+    {
+      "file": "tile-wave-dark.png",
+      "source": "Frame-17-Home-Page-2-Dark.png",
+      "crop": [782, 451, 123, 140],
+      "role": "tile-pattern-detail",
+      "theme": "dark",
+      "complete": false,
+      "note": "Unobscured wave motif detail from Cashflow [FX & Equity], on opaque card backing. Last 7 right/top motif pixels and rounded corner excluded; full pattern needs original export.",
+      "width": 123,
+      "height": 140,
+      "hasAlpha": true,
+      "sha256": "4c8745b2ba72eb9eb31be8104cb7e99dc87d11d02aa3f041ad3b0321bd4b5ceb",
+      "rawSha256": "e80a7986a5ffae17986216e2179d1e905590ea6e9b46d075f9e7f5aef4d0073d",
+      "sourceSha256": "0bee06eca9628504e6d808457d01ff17a9ac4f4be29f001c83a5baca109b21a3",
+      "verification": "exact decoded pixel equality with source crop; no resize, masking, recoloring, retouching, or inferred pixels"
+    },
+    {
+      "file": "tile-dots-dark.png",
+      "source": "Frame-17-Home-Page-2-Dark.png",
+      "crop": [1094, 451, 89, 140],
+      "role": "tile-pattern-detail",
+      "theme": "dark",
+      "complete": false,
+      "note": "Unobscured dotted motif detail from Cashflow [Open Search], on opaque card backing. Top and right 7 pixels excluded to avoid baked rounded corners; full pattern needs original export.",
+      "width": 89,
+      "height": 140,
+      "hasAlpha": true,
+      "sha256": "322fc81705065298766993636ff52cefbd69cfd50956ceec61f6a5724e238e80",
+      "rawSha256": "43520c22aa8f1855b05c4c7559b838efcd43a23ee742f11f17796d737d557979",
+      "sourceSha256": "0bee06eca9628504e6d808457d01ff17a9ac4f4be29f001c83a5baca109b21a3",
+      "verification": "exact decoded pixel equality with source crop; no resize, masking, recoloring, retouching, or inferred pixels"
+    },
+    {
+      "file": "tile-rings-dark-upper.png",
+      "source": "Frame-17-Home-Page-2-Dark.png",
+      "crop": [817, 617, 88, 92],
+      "role": "tile-pattern-detail",
+      "theme": "dark",
+      "complete": false,
+      "note": "Unobscured upper arc fragment from Group Blotter. Lower arc is covered by location controls; title/action pixels excluded. Original export needed for complete ring artwork.",
+      "width": 88,
+      "height": 92,
+      "hasAlpha": true,
+      "sha256": "c22ee2f78107419d07cc3d777d9f8142beb7faf89de0ac0c4fe76684f814a5e7",
+      "rawSha256": "7a12f177894f38b4dc73c5df1abf29aa85ffe89d88cb6e68344e62c2a1171ab0",
+      "sourceSha256": "0bee06eca9628504e6d808457d01ff17a9ac4f4be29f001c83a5baca109b21a3",
+      "verification": "exact decoded pixel equality with source crop; no resize, masking, recoloring, retouching, or inferred pixels"
+    }
+  ]
+}

@@ -109,3 +109,12 @@ HTML appearance attributes for other modes. `styles.css` is scoped to provider
 roots. Neither stylesheet creates React components, registers WebKit elements,
 or chooses the host's persisted preferences. Use documented semantic variables
 or `/tokens` exports rather than inventing token names.
+
+## Existing string class generators
+
+When preserving a Base adapter that uses a string class name or a tagged CSS
+literal, import `stringCss` from `ratan-design-origin/compatibility-css` and
+declare the optional `@emotion/css` peer in that host. This entry returns a
+class-name string. Package `theme.css` returns serialized styles and is not a
+replacement for that contract. Keep this entry out of new component APIs;
+use package `styled` or `sx` for new presentation.

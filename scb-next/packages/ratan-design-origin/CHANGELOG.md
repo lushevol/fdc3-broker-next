@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Add the optional `/compatibility-css` string-class facade for the SCB Base
+  Webpack backport. Core and direct components retain their isolated dependency
+  graphs; hosts declare `@emotion/css` only when importing this migration entry.
+
 - Preserve portal grid row stripes and cell edges with selectors that avoid
   Emotion's server-rendering warnings.
 - Expand Storybook to 157 stories across all public components, curated primitives,

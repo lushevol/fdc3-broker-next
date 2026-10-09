@@ -53,6 +53,7 @@ export default defineConfig({
         theme: "src/theme/index.ts",
         tokens: "src/tokens/index.ts",
         compatibility: "src/compatibility.ts",
+        "compatibility-css": "src/compatibility-css.ts",
         "base-compat": "src/base-compat.tsx",
         dates: "src/dates.tsx",
         "date-range": "src/date-range.tsx",
@@ -63,7 +64,7 @@ export default defineConfig({
     },
     rolldownOptions: {
       external:
-        /^(react|react-dom|@mui\/material|@mui\/icons-material|@mui\/x-date-pickers|@mui\/x-date-pickers-pro|@mui\/x-data-grid|dayjs|@emotion\/react|@emotion\/styled)(\/|$)/,
+        /^(react|react-dom|@mui\/material|@mui\/icons-material|@mui\/x-date-pickers|@mui\/x-date-pickers-pro|@mui\/x-data-grid|dayjs|@emotion\/react|@emotion\/styled|@emotion\/css)(\/|$)/,
       output: {
         preserveModules: true,
         preserveModulesRoot: "src",

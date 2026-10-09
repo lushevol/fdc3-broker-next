@@ -1,0 +1,7 @@
+.sb-story {
+  min-height: 450px;
+}
+
+#storybook-root {
+  padding: 16px;
+}

@@ -14,6 +14,7 @@ import {
   Add,
   Adjust,
   ArrowForwardIos,
+  BadgeOutlined,
   CallMade,
   CheckCircleOutlined,
   Close,
@@ -26,18 +27,21 @@ import {
   KeyboardArrowDown,
   LightMode,
   LockOutlined,
+  MailOutline,
   PersonOutlined,
   PublishedWithChanges,
   RadioButtonUnchecked,
   RateReview,
   Refresh,
   Unpublished,
+  VerifiedUserOutlined,
 } from '../src/icons';
 
 const icons = {
   Add,
   Adjust,
   ArrowForwardIos,
+  BadgeOutlined,
   CallMade,
   CheckCircleOutlined,
   Close,
@@ -50,12 +54,14 @@ const icons = {
   KeyboardArrowDown,
   LightMode,
   LockOutlined,
+  MailOutline,
   PersonOutlined,
   PublishedWithChanges,
   RadioButtonUnchecked,
   RateReview,
   Refresh,
   Unpublished,
+  VerifiedUserOutlined,
 };
 function IconGallery({
   fontSize = 'medium',
@@ -74,7 +80,7 @@ function IconGallery({
         label="Find an icon"
         value={query}
         onChange={(event) => setQuery(event.target.value)}
-        helperText={`${entries.length} of 21 curated icons`}
+        helperText={`${entries.length} of 24 curated icons`}
       />
       <Box
         sx={{
@@ -126,7 +132,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'All 21 public glyphs from the curated icons entry. Icons are decorative beside visible labels; icon-only buttons need aria-label and standalone informative icons need titleAccess.',
+          'All 24 public glyphs from the curated icons entry. Icons are decorative beside visible labels; icon-only buttons need aria-label and standalone informative icons need titleAccess.',
       },
     },
   },

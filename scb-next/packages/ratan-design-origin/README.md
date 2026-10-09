@@ -73,6 +73,10 @@ shadow with the same formula and the dark blue token counterpart.
 - `ratan-design-origin/compatibility`: existing CSS alias strings,
   `InputStyled`, `DialogTitle`, `DialogRoot` and `dialogClasses`; retained
   for Base adapters, not a new customization contract.
+- `ratan-design-origin/compatibility-css`: migration-only `stringCss` for legacy
+  string class names and tagged templates; requires the optional `@emotion/css`
+  peer. It is isolated from the core and other compatibility entries. Prefer
+  `styled` or component `sx` for new presentation.
 - `ratan-design-origin/base-compat`: migration-only legacy Base presentation
   namespaces for Ratan/Cashflow (`Loader`, `Time`, `Button`, `LoadingButton`,
   `Dialog`); it contains no host state, services, routing or theme policy.
@@ -269,7 +273,8 @@ grid/date/Pro integrations and WebKit element registration.
 
 The optional host-installed peer ranges are `@mui/x-date-pickers` (`~6.20.2`),
 `@mui/x-date-pickers-pro` (`~6.20.2`), `@mui/x-data-grid` (`~6.20.4`),
-`@mui/base` (`5.0.0-beta.70`) and `dayjs` (`^1.11.21`). They are never loaded by
+`@mui/base` (`5.0.0-beta.70`), `dayjs` (`^1.11.21`) and `@emotion/css`
+(`^11.13.5`, only for `/compatibility-css`). They are never loaded by
 the core entry. An integration is present only when the host declares it; an
 ancestor-hoisted copy does not enable package entries. Range hosts own date-entry
 policy. Hosts own MUI X Pro licensing and license initialization.
@@ -389,7 +394,7 @@ To customize a global token, add a `:root` declaration after the import; no
 
 ## Storybook catalog
 
-The [component and scenario inventory](STORYBOOK_COVERAGE.md) maps all 157 stories
+The [component and scenario inventory](STORYBOOK_COVERAGE.md) maps all 158 stories
 across 24 files. Start with **Start here / Catalog**, then browse Components,
 Patterns, Foundation, Inputs, Search, Feedback, Integration and Migration.
 Existing story IDs remain available.

@@ -37,6 +37,7 @@ import {
   Typography,
 } from '../src/primitives';
 import { styled } from '../src/theme';
+import { stringCss } from '../src/compatibility-css';
 import { Add } from '../src/icons';
 
 const LegacyInput = styled(TextField)(InputStyled({ left: 'example-label-left' }));
@@ -345,4 +346,16 @@ export const AliasContracts: Story = {
       />
     </Stack>
   ),
+};
+
+/** Existing string-class consumers can migrate without changing their DOM. */
+export const StringClassFacade: Story = {
+  render: () => {
+    const className = stringCss`
+      padding: 16px;
+      border: 1px solid currentColor;
+      border-radius: 8px;
+    `;
+    return <div className={className}>Legacy string class supplied through the package</div>;
+  },
 };

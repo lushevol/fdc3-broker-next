@@ -1,0 +1,34 @@
+import React, { ReactElement } from "react";
+import { Typography, Stack } from "ratan-design-origin/primitives";
+import Root, { classes, PREFIX } from "./common/style";
+import ErrorBoundry from "../../components/ErrorBoundry";
+import { VersionProps } from "./common/interface";
+import { getEnv } from "../../utils/common";
+
+const Version: React.FC<VersionProps> = (props: VersionProps): ReactElement => {
+  return (
+    <ErrorBoundry>
+      <Root
+        className={classes.root}
+        data-testid={`${PREFIX}`}
+        variant="filled"
+        severity="info"
+      >
+        <Stack spacing={1} direction="row">
+          <Typography
+            variant="caption"
+            sx={{ display: "block" }}
+            gutterBottom
+          >{`Version: ${props.version}`}</Typography>
+          <Typography
+            variant="caption"
+            sx={{ display: "block" }}
+            gutterBottom
+          >{`Env: ${getEnv()}`}</Typography>
+        </Stack>
+      </Root>
+    </ErrorBoundry>
+  );
+};
+
+export default React.memo(Version);

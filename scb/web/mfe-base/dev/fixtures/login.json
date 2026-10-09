@@ -1,0 +1,192 @@
+{
+  "result": "success",
+  "userInfo": "{\"sub\":\"mock.cashflow\",\"fullName\":\"Cashflow Acceptance User\",\"auth_time\":1700000000,\"entitlement\":{\"role\":\"FMO_OPS_SUP\",\"actions\":[\"RATAN_CASHFLOW_BLOTTER:UI_Read_Access\",\"RATAN_CASHFLOW_BLOTTER:F_Export_Data\",\"RATAN_CASHFLOW_BLOTTER:F_Custom_Query_Builder\",\"RATAN_CASHFLOW_BLOTTER:F_Custom_View_Builder_Private\",\"RATAN_STRATEGIC_CASHFLOW_BLOTTER:UI_Read_Access\",\"RATAN_STRATEGIC_CASHFLOW_BLOTTER:F_Export_Data\",\"RATAN_STRATEGIC_CASHFLOW_BLOTTER:F_Custom_Query_Builder\",\"RATAN_STRATEGIC_CASHFLOW_BLOTTER:F_Custom_View_Builder_Private\",\"RATAN_PROFILE_LIMITS:ACCESS_FMO_POST_TRADE_PORTAL\",\"RATAN_PROFILE_LIMITS:F_Input_Delete_Modify_Initiate\",\"ALPHA_PAYMENTS:UI_READ\",\"ALPHA_PAYMENTS:ACKNOWLEDGE\"]}}",
+  "entities": [
+    {
+      "id": 1,
+      "name": "X_RATANONE",
+      "applicationName": "RATAN",
+      "roleId": 1,
+      "roleName": "FMO_OPS_SUP",
+      "subjects": [
+        {
+          "id": 1,
+          "name": "RATAN_STRATEGIC_CASHFLOW_BLOTTER",
+          "actions": [
+            {
+              "id": 1,
+              "entitlementId": 1,
+              "name": "UI_Read_Access"
+            },
+            {
+              "id": 2,
+              "entitlementId": 2,
+              "name": "F_Export_Data"
+            },
+            {
+              "id": 3,
+              "entitlementId": 3,
+              "name": "F_Custom_Query_Builder"
+            },
+            {
+              "id": 4,
+              "entitlementId": 4,
+              "name": "F_Custom_View_Builder_Private"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "X_ALPHA_PAYMENTS",
+      "applicationName": "ALPHA_PAYMENTS",
+      "roleId": 1,
+      "roleName": "FMO_OPS_SUP",
+      "subjects": [
+        {
+          "id": 2,
+          "name": "ALPHA_PAYMENTS",
+          "actions": [
+            {
+              "id": 5,
+              "entitlementId": 5,
+              "name": "UI_READ"
+            },
+            {
+              "id": 6,
+              "entitlementId": 6,
+              "name": "ACKNOWLEDGE"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "drawers": [
+    {
+      "id": 1,
+      "label": "Settlement",
+      "tiles": [
+        {
+          "id": 1,
+          "title": "Cashflow Blotter",
+          "container": "@fm/ratan_container",
+          "module": "/cashflow_blotter_cn",
+          "tile": "/cashflow_cn",
+          "imageDarkTheme": "",
+          "imageLightTheme": "",
+          "emailSupport": "cashflow-support@example.test",
+          "entity": [
+            "X_RATANONE"
+          ]
+        },
+        {
+          "id": 2,
+          "title": "Cashflow Open Search",
+          "container": "@fm/ratan_container",
+          "module": "/cashflow_blotter_cn",
+          "tile": "/cashflow_open_search",
+          "imageDarkTheme": "",
+          "imageLightTheme": "",
+          "emailSupport": "cashflow-support@example.test",
+          "entity": [
+            "X_RATANONE"
+          ]
+        },
+        {
+          "id": 3,
+          "title": "Cashflow Group Management",
+          "container": "@fm/ratan_container",
+          "module": "/cashflow_blotter_cn",
+          "tile": "/cashflow_group_management",
+          "imageDarkTheme": "",
+          "imageLightTheme": "",
+          "emailSupport": "cashflow-support@example.test",
+          "entity": [
+            "X_RATANONE"
+          ]
+        },
+        {
+          "id": 4,
+          "title": "Cashflow Dashboard",
+          "container": "@fm/ratan_container",
+          "module": "/cashflow_blotter_cn",
+          "tile": "/cashflow_cn_dashboard",
+          "imageDarkTheme": "",
+          "imageLightTheme": "",
+          "emailSupport": "cashflow-support@example.test",
+          "entity": [
+            "X_RATANONE"
+          ]
+        },
+        {
+          "id": 5,
+          "title": "BIC Netting Static Table",
+          "container": "@fm/ratan_container",
+          "module": "/cashflow_blotter_cn",
+          "tile": "/cashflow_bic_netting_static_table",
+          "imageDarkTheme": "",
+          "imageLightTheme": "",
+          "emailSupport": "cashflow-support@example.test",
+          "entity": [
+            "X_RATANONE"
+          ]
+        },
+        {
+          "id": 6,
+          "title": "Utilization Static Table",
+          "container": "@fm/ratan_container",
+          "module": "/cashflow_blotter_cn",
+          "tile": "/cashflow_utilization_static_table",
+          "imageDarkTheme": "",
+          "imageLightTheme": "",
+          "emailSupport": "cashflow-support@example.test",
+          "entity": [
+            "X_RATANONE"
+          ]
+        },
+        {
+          "id": 7,
+          "title": "Cashflow Authorization Limits",
+          "container": "@fm/ratan_container",
+          "module": "/cashflow_blotter_cn",
+          "tile": "/cashflow_authorization_limits",
+          "imageDarkTheme": "",
+          "imageLightTheme": "",
+          "emailSupport": "cashflow-support@example.test",
+          "entity": [
+            "X_RATANONE"
+          ]
+        },
+        {
+          "id": 8,
+          "title": "Cashflow Splitting Static",
+          "container": "@fm/ratan_container",
+          "module": "/cashflow_blotter_cn",
+          "tile": "/cashflow_splitting_static",
+          "imageDarkTheme": "",
+          "imageLightTheme": "",
+          "emailSupport": "cashflow-support@example.test",
+          "entity": [
+            "X_RATANONE"
+          ]
+        },
+        {
+          "id": 9,
+          "title": "Payment Investigation",
+          "subtitle": "Alpha Payments",
+          "container": "@fm/alpha_payments",
+          "module": "/payment-investigation",
+          "tile": "/payment-investigation",
+          "imageDarkTheme": "",
+          "imageLightTheme": "",
+          "emailSupport": "alpha-payments-support@example.test",
+          "entity": [
+            "X_ALPHA_PAYMENTS"
+          ]
+        }
+      ]
+    }
+  ]
+}

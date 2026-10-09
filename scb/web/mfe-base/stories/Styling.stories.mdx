@@ -1,0 +1,114 @@
+import { Meta } from '@storybook/blocks';
+
+<Meta title="Styling" />
+<style>
+  {`
+    h3 {
+      margin-top: 1.5rem !important;
+    }
+    .mui {
+      margin-top: 1rem;
+      margin-bottom: 1rem;
+      font-weight: 900;
+    }
+    .div-img {
+      margin-top: 1rem;
+      margin-bottom: 1rem;
+    }
+    .div-img > img {
+        margin-bottom: 1rem;
+      }
+  `}
+</style>
+
+# Styling
+##
+<h3>This page helps developers to create style for their components.</h3>
+##
+<br/>
+<div className="mui">
+  There are 2 ways to create style.<br/>
+  The first one is using JSS which is directly create as JavaScript Object as shown in `classes.root` and `classes.section` below.<br/>
+  The second one is using css function as shown in `classes.button_with_css` below.<br/>
+</div>
+<div>
+  <a href="https://bitbucket.global.standardchartered.com/projects/RATANRT/repos/mfe-template-tiles/browse/src/Tile1/components/Comp1/common/style.ts?at=refs%2Fheads%2Ftrunk" target="_blank">`/src/Tile1/components/Comp1/common/style.ts in mfe-template-tiles`</a> File.
+  ``` tsx dark
+  import { css, styled } from "ratan-design-origin/theme";
+  export const PREFIX = `${process.env.MFE_APP_PREFIX_STYLE}_Comp1`;
+  export const classes = {
+    root: `${PREFIX}-root`,
+    section: `${PREFIX}-section`,
+    button_with_css: `${PREFIX}-button_with_css`,
+  };
+
+  const Root = styled("section")(({ theme }) => ({
+    [`&.${classes.root}`]: {
+      width: "100%",
+      padding: theme.spacing(2),
+      wordBreak: "break-all",
+    },
+    [`& .${classes.section}`]: {
+      marginTop: theme.spacing(5),
+    },
+    [`& .${classes.button_with_css}`]: css`
+      margin-top: ${theme.spacing(1)};
+    `,
+  }));
+
+  export default Root;
+  ```
+</div>
+<div className="mui">
+  All `classes.root`, `classes.section` and `classes.button_with_css` can be used as `className` value in any components.<br/>
+  As an example, they are used in <a href="https://bitbucket.global.standardchartered.com/projects/RATANRT/repos/mfe-template-tiles/browse/src/Tile1/components/Comp1/index.tsx?at=trunk" target="_blank">`/src/Tile1/components/Comp1/index.tsx in mfe-template-tiles`</a>.<br/>
+</div>
+<div>
+  <a href="https://bitbucket.global.standardchartered.com/projects/RATANRT/repos/mfe-template-tiles/browse/src/Tile1/components/Comp1/index.tsx?at=trunk" target="_blank">`/src/Tile1/components/Comp1/index.tsx in mfe-template-tiles`</a> File.
+  ``` tsx dark
+  import React from "react";
+  import useController from "./common/useController";
+  import Root, { classes, PREFIX } from "./common/style";
+  import { Comp1Props } from "./common/interface";
+  import { ErrorBoundry } from "../../../Root/import";
+  import { TextField as TextField } from "ratan-design-origin/primitives";
+  import { Button as Button } from "ratan-design-origin/primitives";
+
+  const Comp1: React.FC<Comp1Props> = (props: Comp1Props): React.ReactElement => {
+    const { ContainerStore } = useController(props);
+
+    return (
+      <ErrorBoundry>
+        <Root className={classes.root} data-testid={`${PREFIX}`}>
+          <section className={classes.section}>Comp1</section>
+          <div>
+            <TextField
+              id="outlined-basic"
+              label="Outlined"
+              variant="outlined"
+              color="primary"
+              hiddenLabel
+            />
+          </div>
+          <Button variant="contained" size="large" color="primary" className={classes.button_with_css}>
+            Contained Primary
+          </Button>
+        </Root>
+      </ErrorBoundry>
+    );
+  };
+
+  export default React.memo(Comp1);
+  ```
+</div>
+<div className="mui">
+  Once the component is rendered in the browser, the Material-UI `styled` function will generate random text `css-1xhai9e`.<br/>
+  It will prevent the overriding the css classname selector.<br/>
+  Moreover, we can also use unique name for the `PREFIX` value above.<br/> 
+  All the className `classes.root=MicroWebUI_Comp1-root`, `classes.section=MicroWebUI_Comp1-section`, and `classes.button_with_css=MicroWebUI_Comp1-section` are descendant of `css-1xhai9e`.<br/>
+</div>
+<div className="div-img">
+<img src="https://fmo-mfe-dev.uk.dev.net:8453/image/asset1.png" alt="asset1" />
+<img src="https://fmo-mfe-dev.uk.dev.net:8453/image/asset2.png" alt="asset2" />
+<img src="https://fmo-mfe-dev.uk.dev.net:8453/image/asset3.png" alt="asset3" />
+</div>

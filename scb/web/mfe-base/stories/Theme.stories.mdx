@@ -1,0 +1,729 @@
+import { Meta } from '@storybook/blocks';
+
+<Meta title="Theme" />
+<style>
+  {`
+    h3 {
+      margin-top: 1.5rem !important;
+    }
+    .mui {
+      margin-top: 1rem;
+      margin-bottom: 1rem;
+      font-weight: 900;
+    }
+  `}
+</style>
+
+# Theme
+
+##
+<h3>This page helps developers to understand how the Theme for Material-UI is configured in <a href="https://bitbucket.global.standardchartered.com/scm/ratanrt/mfe-base.git" target="_blank">Base Container</a>.</h3>
+##
+<br/>
+<h4>
+  The complete documentation about Material-UI theme can be found in <a href="https://mui.com/material-ui/customization/theming/" target="_blank">here</a>.
+</h4>
+<div className="mui">
+  The Theme configuration for Material-UI is in <a href="https://bitbucket.global.standardchartered.com/projects/RATANRT/repos/mfe-base/browse/src/theme?at=refs%2Fheads%2Ftrunk" target="_blank">`theme`</a> folder.<br/>
+  <a href="https://bitbucket.global.standardchartered.com/projects/RATANRT/repos/mfe-base/browse/src/theme/Config.ts?at=refs%2Fheads%2Ftrunk" target="_blank">`/src/theme/Config.ts`</a> file consists of the configuration detail.<br/>
+  <a href="https://bitbucket.global.standardchartered.com/projects/RATANRT/repos/mfe-base/browse/src/theme/index.tsx?at=refs%2Fheads%2Ftrunk" target="_blank">`/src/theme/index.tsx`</a> file is Theme Provider Component that will be used in <a href="https://bitbucket.global.standardchartered.com/projects/RATANRT/repos/mfe-base/browse/src/App.tsx?at=trunk" target="_blank">`/src/App.tsx`</a> file.<br/>
+</div>
+<div>
+  <a href="https://bitbucket.global.standardchartered.com/projects/RATANRT/repos/mfe-base/browse/src/theme/Config.ts?at=refs%2Fheads%2Ftrunk" target="_blank">`Config.ts`</a> File.<br/>
+  ``` tsx dark
+  import { createTheme, responsiveFontSizes } from "ratan-design-origin/theme";
+  import custom from "./config/common";
+
+  export const Config = (props) => {
+    let config = createTheme({
+      theme: { ...props },
+      customColor: custom.color,
+      typography: {
+        fontFamily: '"Poppins", Helvetica !important',
+        fontSize: 12,
+        button: {
+          textTransform: "none",
+        },
+      },
+      palette: {
+        ...props.palette,
+      },
+      shape: {
+        borderRadius: 3,
+      },
+      components: {
+        MuiButtonBase: {
+          styleOverrides: {
+            root: {
+              outline: "0 !important",
+              ":focus": {
+                outline: "0 !important",
+              },
+              textTransform: "capitalize",
+              borderRadius: "5px",
+              fontWeight: 600,
+            },
+          },
+        },
+        MuiCssBaseline: {
+          ...props.MuiCssBaseline,
+        },
+        MuiAppBar: { ...props.MuiAppBar },
+        MuiFilledInput: {
+          defaultProps: {
+            margin: "dense",
+          },
+        },
+        MuiFormControl: {
+          defaultProps: {
+            margin: "dense",
+          },
+        },
+        MuiFormHelperText: {
+          defaultProps: {
+            margin: "dense",
+          },
+        },
+        MuiInputBase: {
+          defaultProps: {
+            margin: "dense",
+          },
+        },
+        MuiInputLabel: {
+          defaultProps: {
+            margin: "dense",
+          },
+        },
+        MuiListItem: {
+          defaultProps: {
+            dense: true,
+          },
+        },
+        MuiOutlinedInput: {
+          defaultProps: {
+            margin: "dense",
+          },
+        },
+        MuiTextField: {
+          defaultProps: {
+            margin: "dense",
+            size: "small",
+          },
+        },
+        MuiToolbar: {
+          defaultProps: {
+            variant: "dense",
+          },
+        },
+        MuiButton: {
+          defaultProps: {
+            size: "small",
+          },
+          styleOverrides: {
+            root: {
+              outline: "0 !important",
+              ":focus": {
+                outline: "0 !important",
+              },
+              textTransform: "capitalize",
+              borderRadius: "5px",
+              fontWeight: 600,
+            },
+          },
+        },
+        MuiIconButton: {
+          defaultProps: {
+            size: "small",
+          },
+        },
+        MuiFab: {
+          defaultProps: {
+            size: "small",
+          },
+        },
+        MuiTable: {
+          defaultProps: {
+            size: "small",
+          },
+        },
+        MuiAlert: {
+          styleOverrides: {
+            message: {
+              userSelect: "text",
+            },
+          },
+        },
+        MuiSnackbar: {
+          styleOverrides: {
+            root: {
+              maxWidth: "62%",
+            },
+          },
+        },
+      },
+    });
+    config = responsiveFontSizes(config);
+    return { config };
+  };
+
+  export default Config;
+  ```
+</div>
+<div className="mui">
+  <section>There is one `React.useMemo` that observe the `store.theme` value in <a href="https://bitbucket.global.standardchartered.com/projects/RATANRT/repos/mfe-base/browse/src/theme/index.tsx?at=refs%2Fheads%2Ftrunk" target="_blank">`/src/theme/index.tsx`</a> file below.</section>
+  <section>If the `store.theme` value is changed, then it will invoke the Config from `Config.ts` file.</section>
+</div>
+<div>
+  <a href="https://bitbucket.global.standardchartered.com/projects/RATANRT/repos/mfe-base/browse/src/theme/index.tsx?at=refs%2Fheads%2Ftrunk" target="_blank">`/src/theme/index.tsx`</a> File.
+  ``` tsx dark
+  import React, { ReactElement } from "react";
+  import { ThemeProvider as MuiThemeProvider } from "ratan-design-origin/theme";
+  import { CssBaseline as CssBaseline } from "ratan-design-origin/primitives";
+  import Config from "./Config";
+  import { useContext } from "../hooks/provider";
+  import { ComponentPropsDefault } from "../hooks/model/root";
+  import { getTheme } from "./config/utils";
+
+  const ThemeProvider: React.FC<ComponentPropsDefault> = (
+    props
+  ): ReactElement => {
+    const [store] = useContext();
+    const theme = React.useMemo(() => {
+      document.documentElement.className = store.theme || "light";
+      const { config } = Config(getTheme(store.theme));
+      return config;
+    }, [store.theme]);
+
+    return (
+      <MuiThemeProvider theme={theme}>
+        <CssBaseline />
+        {props.children}
+      </MuiThemeProvider>
+    );
+  };
+
+  export default ThemeProvider;
+  ```
+</div>
+<div className="mui">
+  <section>The `getTheme` in the above code is a function to get the `dark` and `light` configuration.</section>
+</div>
+<div>
+  <a href="https://bitbucket.global.standardchartered.com/projects/RATANRT/repos/mfe-base/browse/src/theme/config/utils.ts?at=refs%2Fheads%2Ftrunk" target="_blank">`/src/theme/config/utils.ts`</a> File.
+  ``` tsx dark
+  import dark from "./dark";
+  import light from "./light";
+
+  export enum THEME {
+    DARK = "dark",
+    LIGHT = "light",
+    GOLD = "gold",
+  }
+
+  export const getTheme = (theme: string | undefined) => {
+    switch (theme) {
+      case THEME.DARK:
+        return dark;
+      case THEME.LIGHT:
+        return light;
+      case THEME.GOLD:
+        return dark;
+      default:
+        return light;
+    }
+  };
+  ```
+</div>
+<div>
+  <a href="https://bitbucket.global.standardchartered.com/projects/RATANRT/repos/mfe-base/browse/src/theme/config/dark.ts?at=trunk" target="_blank">`/src/theme/config/dark.ts`</a> File.
+  ``` tsx dark
+  import { css, darken } from "ratan-design-origin/theme";
+  import color from "./color";
+  import colordark from "./color.dark";
+  import custom from "./common";
+  import scroll from "./scroll.dark";
+  import normalize from "./normalize";
+
+  export default {
+    palette: {
+      mode: "dark",
+      primary: {
+        main: "#0473ea",
+      },
+      secondary: {
+        main: "#008738",
+      },
+      background: {
+        default: "#171d24 !important",
+      },
+    },
+    MuiCssBaseline: {
+      styleOverrides: {
+        html: {
+          ":root": css`
+            ${color}
+            ${colordark}
+            --theme-color-modal-header: ${custom.color["mirage-52"]};
+            --theme-color-modal-header-border: ${darken(
+              custom.color["mirage-52"],
+              0.3
+            )};
+            --ag-header-background-color: ${custom.color["mirage-52"]};
+            --ag-border-color: ${darken(custom.color["mirage-52"], 0.3)};
+          `,
+        },
+        body: {
+          background: `${custom.color["mirage-52"]} !important`,
+          ...scroll,
+          "*": {
+            ...scroll,
+            userSelect: "none",
+          },
+        },
+        ...normalize,
+      },
+    },
+    MuiAppBar: {
+      styleOverrides: {
+        root: {
+          backdropFilter: "blur(37.5px)",
+          background: "#1A2028",
+          backgroundImage:
+            "linear-gradient(90deg, rgba(50,58,66,1) 0%, rgba(23,29,36,1) 20%, rgba(13,32,38,1) 30%, rgba(42,79,90, 0.5) 63%, rgba(13,32,38,1) 70%, rgba(23,29,36,1) 80%, rgba(46,55,69,1) 100%)",
+          borderBottom: "1px solid rgba(50,58,66,0.5)",
+        },
+      },
+    },
+    LoginPage: {
+      main: {
+        background: `linear-gradient(to right bottom, rgb(26, 32, 40) 0%, rgba(26, 32, 40, 0) 50%, rgb(26, 32, 40) 100%) padding-box, 
+      linear-gradient(to right bottom, rgb(65, 73, 85), rgba(44, 50, 59, 0)) border-box `,
+      },
+    },
+    Avatar: {
+      menu: {
+        "& .MuiList-root": {
+          backgroundColor: "rgba(46,55,69,1)",
+        },
+      },
+    },
+    SwitchComponent: {
+      backgroundColor: custom.color["mako"],
+      color: custom.color["white"],
+      MuiSwitch: {
+        "& .MuiSwitch-switchBase": {
+          padding: 2,
+          "&.Mui-checked": {
+            transform: "translateX(12px)",
+            "& + .MuiSwitch-track": {
+              opacity: 1,
+              background: `linear-gradient(to right,rgba(0, 0, 0, 1),rgba(0, 0, 0, 0.3)) padding-box,
+              linear-gradient(to right, rgba(65, 73, 85, 1), rgba(44, 50, 59, 0)) border-box`,
+            },
+          },
+        },
+        "& .MuiSwitch-thumb": {
+          backgroundColor: custom.color["swithThumb"],
+          boxShadow: "none",
+          width: 10,
+          height: 10,
+          borderRadius: 5,
+        },
+        "& .MuiSwitch-track": {
+          borderRadius: 8,
+          opacity: 1,
+          background: `linear-gradient(to right,rgba(0, 0, 0, 1),rgba(0, 0, 0, 0.3)) padding-box,
+          linear-gradient(to right, rgba(65, 73, 85, 1), rgba(44, 50, 59, 0)) border-box`,
+        },
+      },
+    },
+    NewTileComponent: {
+      backgroundColor: custom.color["newTileOxford"],
+      boxShadow: "0px 5px 20px rgba(42, 67, 90, 0.5)",
+      fontWeight: 300,
+      root: {
+        border: "1px solid transparent",
+        background: `linear-gradient(to right,rgba(26, 32, 40, 1),rgba(26, 32, 40, 0)) padding-box,
+        linear-gradient(to right, rgba(65, 73, 85, 1), rgba(44, 50, 59, 0)) border-box`,
+        borderRadius: "15px",
+        padding: "2px 16px 2px 5px",
+        "&:hover": {
+          background: `linear-gradient(to right,rgba(26, 32, 40, 1),rgba(26, 32, 40, 1)) padding-box,
+        linear-gradient(to right, rgba(65, 73, 85, 1), rgba(44, 50, 59, 0)) border-box`,
+        },
+      },
+    },
+    DrawerComponent: {
+      backgroundColor: custom.color["mirage2"],
+      title: {
+        color: custom.color["silver"],
+        backgroundImage:
+          "linear-gradient(90deg, rgba(33,38,42,1) 0%, rgba(23,29,36,0.8) 40%, rgba(23,29,36,1) 50%, rgba(23,29,36,0.8) 90%, rgba(28,34,42,1) 100%)",
+      },
+    },
+    TileComponent: {
+      background: `linear-gradient( to bottom right, rgba(26, 32, 40, 1) 0%, rgba(26, 32, 40, 0) 50%, rgba(26, 32, 40, 1) 100%) padding-box,
+      linear-gradient(to bottom right, rgba(65, 73, 85, 1), rgba(44, 50, 59, 0)) border-box`,
+      boxShadow: `0px 2px 4px -1px rgb(0 0 0 / 20%),
+      0px 4px 5px 0px rgb(0 0 0 / 14%), 0px 1px 10px 0px rgb(0 0 0 / 12%)`,
+      border: "1px solid transparent",
+      title: {
+        color: custom.color["white"],
+        fontWeight: 300,
+      },
+      button: {
+        backgroundColor: "rgba(50,58,66,0.7)",
+        boxShadow: "0px 0px 8px rgba(50,58,66,0.9)",
+        border: "1px solid rgba(50,58,66,1)",
+        color: custom.color["silver"],
+        "&:hover": {
+          backgroundColor: "rgba(50,58,66,0.9)",
+        },
+      },
+    },
+    TabItem: {
+      TextBox: {
+        "& input": {
+          textOverflow: "ellipsis",
+          color: "#c0c0c0",
+        },
+      },
+      Button: {
+        color: custom.color["grey"],
+        width: 22,
+        height: 22,
+      },
+    },
+    HomePage: {
+      Addtab: {
+        background: "rgba(255,255,255,0.4)",
+        color: "inherit",
+        width: "24px",
+        height: "24px",
+        minWidth: "24px",
+        minHeight: "24px",
+        padding: "4px",
+        "& svg": {
+          width: "16px",
+          height: "16px",
+        },
+        "&:hover": {
+          background: "rgba(255,255,255,0.4)",
+          color: "inherit",
+        },
+      },
+      Box: {
+        boxShadow:
+          "0px 2px 4px -1px rgb(50,58,66,0.9), 0px 4px 5px 0px rgb(50,58,66,0.9), 0px 1px 10px 0px rgb(50,58,66,0.9)",
+      },
+      "MuiTabs-indicator": {
+        borderLeft: "1px solid rgba(50,58,66,1)",
+        borderRight: "1px solid rgba(50,58,66,1)",
+        borderTop: "1px solid rgba(50,58,66,1)",
+        background: "#171d24",
+        boxShadow: "0px -1px 3px rgba(50,58,66,0.9)",
+      },
+    },
+    MenuItem: {
+      Title: {
+        color: custom.color["silver"],
+      },
+    },
+  };
+  ```
+</div>
+<div>
+  <a href="https://bitbucket.global.standardchartered.com/projects/RATANRT/repos/mfe-base/browse/src/theme/config/light.ts?at=trunk" target="_blank">`/src/theme/config/light.ts`</a> File.
+  ``` tsx dark
+  import { css } from "ratan-design-origin/theme";
+  import color from "./color";
+  import light from "./color.light";
+  import custom from "./common";
+  import scroll from "./scroll.light";
+  import normalize from "./normalize";
+
+  export default {
+    palette: {
+      mode: "light",
+      primary: {
+        main: "#2C3F5E",
+      },
+      secondary: {
+        main: "#008738",
+      },
+      background: {
+        default: "#F7F9FD !important",
+      },
+    },
+    MuiCssBaseline: {
+      styleOverrides: {
+        html: {
+          ":root": css`
+            ${color}
+            ${light}
+          `,
+        },
+        body: {
+          background: `#F7F9FD !important`,
+          ...scroll,
+          "*": {
+            ...scroll,
+            userSelect: "none",
+          },
+        },
+        ...normalize,
+      },
+    },
+    MuiAppBar: {
+      styleOverrides: {
+        root: {
+          backdropFilter: "blur(37.5px)",
+          color: "#1A2028",
+          background: "rgba(244, 246, 250, 0.01)",
+          backgroundImage: `linear-gradient(90deg, 
+              rgba(217,217,217,1) 0%, 
+              rgba(253,253,253,1) 25%, 
+              rgba(190,203,207,1) 49%, 
+              rgba(193,209,213,1) 53%, 
+              rgba(227,230,233,1) 75%, 
+              rgba(255,255,255, 1) 100%)`,
+          borderBottom: "1px solid rgb(211,224,225)",
+          boxShadow:
+            "0px 2px 4px 0px rgb(153,223,223,0.2), 0px 4px 5px 0px rgb(234,244,245,0.14), 0px 1px 10px 0px rgb(0,0,0,0.12)",
+        },
+      },
+    },
+    LoginPage: {
+      main: {
+        background: `linear-gradient(to right bottom, rgb(220,230,233) 0%,rgb(253,253,253)50%,rgb(220,230,233) 100%) padding-box padding-box, 
+      linear-gradient(to right bottom, rgb(65, 73, 85), rgba(44, 50, 59, 0)) border-box border-box`,
+      },
+    },
+    Avatar: {
+      menu: {
+        "& .MuiList-root": {
+          backgroundColor: "#F7F9FD",
+        },
+      },
+    },
+    SwitchComponent: {
+      backgroundColor: "#C5D0DF",
+      color: custom.color["mako"],
+      MuiSwitch: {
+        "& .MuiSwitch-switchBase": {
+          padding: 2,
+          "&.Mui-checked": {
+            transform: "translateX(12px)",
+            "& + .MuiSwitch-track": {
+              opacity: 1,
+              background: "rgba(244, 246, 250, 1)",
+              border: "1px solid rgba(216, 226, 241, 1)",
+            },
+          },
+        },
+        "& .MuiSwitch-thumb": {
+          backgroundColor: "#C5D0DF",
+          boxShadow: "none",
+          width: 10,
+          height: 10,
+          borderRadius: 5,
+        },
+        "& .MuiSwitch-track": {
+          borderRadius: 8,
+          opacity: 1,
+          background: "rgba(244, 246, 250, 1)",
+          border: "1px solid rgba(216, 226, 241, 1)",
+        },
+      },
+    },
+    NewTileComponent: {
+      backgroundColor: "#C5D0DF",
+      boxShadow: "0px 5px 20px #C2D8DE",
+      fontWeight: 500,
+      root: {
+        border: "1px solid transparent",
+        backgroundColor: "rgba(194, 216, 222, 0.5)",
+        background: `linear-gradient(to right,rgba(194, 216, 222, 0.5),rgba(194, 216, 222, 0.5)) padding-box,
+        linear-gradient(to right,rgba(216, 226, 241, 1), rgba(139, 156, 180, 0)) border-box`,
+        borderRadius: "15px",
+        padding: "2px 16px 2px 5px",
+        "&:hover": {
+          background: `linear-gradient(to right,rgba(216, 226, 241, 1),rgba(139, 156, 180, 0.2)) padding-box,
+          linear-gradient(to right,rgba(216, 226, 241, 1), rgba(139, 156, 180, 0)) border-box`,
+        },
+      },
+    },
+    DrawerComponent: {
+      backgroundColor: "#F7F9FD",
+      title: {
+        color: "rgba(126, 131, 143, 1)",
+        backgroundImage: `linear-gradient(90deg, 
+          rgba(217,217,217,1) 0%, 
+          rgba(253,253,253,1) 25%, 
+          rgba(220,230,233,1) 49%, 
+          rgba(220,230,233,1) 53%, 
+          rgba(227,230,233,1) 75%, 
+          rgba(255,255,255, 1) 100%)`,
+      },
+    },
+    TileComponent: {
+      background: `linear-gradient(to right bottom, rgb(220,230,233) 0%,rgb(253,253,253)50%,rgb(220,230,233) 100%) padding-box padding-box, 
+      linear-gradient(to right bottom, rgb(65, 73, 85), rgba(44, 50, 59, 0)) border-box border-box`,
+      boxShadow: `0px 2px 4px -1px rgb(0 0 0 / 20%),
+      0px 4px 5px 0px rgb(0 0 0 / 14%), 0px 1px 10px 0px rgb(0 0 0 / 12%)`,
+      border: "0px solid transparent",
+      title: {
+        color: "#1A2028",
+        fontWeight: 600,
+      },
+      button: {
+        backgroundColor: "rgba(213,222,234,0.8)",
+        border: "1px solid rgba(213,222,234,1)",
+        color: custom.color["silver"],
+        "&:hover": {
+          backgroundColor: "rgba(213,222,234,1)",
+        },
+      },
+    },
+    TabItem: {
+      TextBox: {
+        "& input": {
+          textOverflow: "ellipsis",
+          color: "#616670",
+        },
+      },
+      Button: {
+        color: "#616670",
+        width: 22,
+        height: 22,
+      },
+    },
+    HomePage: {
+      Addtab: {
+        background: "#c6c8cb",
+        color: "#1A2028",
+        width: "24px",
+        height: "24px",
+        minWidth: "24px",
+        minHeight: "24px",
+        padding: "4px",
+        "& svg": {
+          width: "16px",
+          height: "16px",
+        },
+        "&:hover": {
+          background: "#c6c8cb",
+          color: "#1A2028",
+        },
+      },
+      Box: {
+        boxShadow:
+          "0px 2px 4px -1px rgb(153 223 223 / 20%), 0px 4px 5px 0px rgb(234 244 245 / 14%), 0px 1px 10px 0px rgb(0 0 0 / 12%)",
+      },
+      "MuiTabs-indicator": {
+        borderLeft: "1px solid rgba(255, 255, 255, 0.2)",
+        borderRight: "1px solid rgba(255, 255, 255, 0.2)",
+        borderTop: "1px solid rgba(255, 255, 255, 0.2)",
+        background: "#F7F9FD",
+        boxShadow:
+          "0px 2px 4px -1px rgb(153 223 223 / 20%), 0px 4px 5px 0px rgb(234 244 245 / 14%), 0px 1px 10px 0px rgb(0 0 0 / 12%)",
+      },
+    },
+    MenuItem: {
+      Title: {
+        color: "1A2028",
+      },
+    },
+  };
+  ```
+</div>
+<div className="mui">
+  <a href="https://bitbucket.global.standardchartered.com/projects/RATANRT/repos/mfe-base/browse/src/theme/config/dark.ts?at=trunk" target="_blank">`/src/theme/config/dark.ts`</a> 
+  and <a href="https://bitbucket.global.standardchartered.com/projects/RATANRT/repos/mfe-base/browse/src/theme/config/light.ts?at=trunk" target="_blank">`/src/theme/config/light.ts`</a> files above, they have specific configuration for `primary`, `secondary`, and `background` color.<br/><br/>
+  The `configuration` above is used by the <a href="https://bitbucket.global.standardchartered.com/projects/RATANRT/repos/mfe-base/browse/src/theme/index.tsx?at=refs%2Fheads%2Ftrunk" target="_blank">`/src/theme/index.tsx`</a> as `ThemeProvider`.<br/>
+  This `ThemeProvider` is used by the <a href="https://bitbucket.global.standardchartered.com/projects/RATANRT/repos/mfe-base/browse/src/App.tsx?at=trunk" target="_blank">`/src/App.tsx`</a> file as shown below.
+</div>
+<div>
+  <a href="https://bitbucket.global.standardchartered.com/projects/RATANRT/repos/mfe-base/browse/src/App.tsx?at=trunk" target="_blank">`/src/App.tsx`</a> File.
+  ``` tsx dark
+  import React, { ReactElement } from "react";
+  import Provider from "./hooks/provider";
+  import ThemeProvider from "./theme";
+  import Routing from "./routing";
+
+  const App: React.FC = (): ReactElement => (
+    <Provider>
+      <ThemeProvider>
+        <Routing />
+      </ThemeProvider>
+    </Provider>
+  );
+
+  export default App;
+  ```
+</div>
+<div className="mui">
+  With the Material-UI configuration above, We can have a consistent design language in all components and Web Application/ Portal.<br/>
+  The application team developers do not need to define the `font-family`, `background-color`, `font-color`, `height` or `width` of the button, etc.<br/>
+  The Material-UI configuration above can be consumed by any application team developers for any `Tiles`.<br/>
+  For example <a href="https://bitbucket.global.standardchartered.com/projects/RATANRT/repos/mfe-template-tiles/browse/src/Root/import/index.ts?at=refs%2Fheads%2Ftrunk" target="_blank">`/src/Root/import/index.ts in mfe-template-tiles`</a>, the Config (ThemeConfig) and ThemeUtil are imported from <a href="https://bitbucket.global.standardchartered.com/scm/ratanrt/mfe-base.git" target="_blank">Base Container</a>.
+</div>
+<div>
+  <a href="https://bitbucket.global.standardchartered.com/projects/RATANRT/repos/mfe-template-tiles/browse/src/Root/import/index.ts?at=refs%2Fheads%2Ftrunk" target="_blank">`/src/Root/import/index.ts in mfe-template-tiles`</a> File.
+  ``` tsx dark
+  import * as Container from "@fm/base";
+  ...
+  export const ThemeConfig = Container.ThemeConfig.default;
+  export const ThemeUtil = Container.ThemeUtil;
+  export default Container;
+  ```
+</div>
+<div className="mui">
+  The `ThemeConfig` and `ThemeUtil` above are used in <a href="https://bitbucket.global.standardchartered.com/projects/RATANRT/repos/mfe-template-tiles/browse/src/Root/component/MfeThemeProvider/index.tsx?at=refs%2Fheads%2Ftrunk" target="_blank">`/src/Root/component/MfeThemeProvider/index.tsx in mfe-template-tiles`</a> to create the <a href="https://bitbucket.global.standardchartered.com/projects/RATANRT/repos/mfe-template-tiles/browse/src/Root/component/MfeThemeProvider/index.tsx?at=refs%2Fheads%2Ftrunk" target="_blank">`MfeThemeProvider`</a>.<br/>
+</div>
+<div>
+  <a href="https://bitbucket.global.standardchartered.com/projects/RATANRT/repos/mfe-template-tiles/browse/src/Root/component/MfeThemeProvider/index.tsx?at=refs%2Fheads%2Ftrunk" target="_blank">`/src/Root/component/MfeThemeProvider/index.tsx in mfe-template-tiles`</a> File.
+  ``` tsx dark
+  import { FC, PropsWithChildren, useMemo } from "react";
+  import { ContainerProvider, ThemeConfig, ThemeUtil } from "../../import";
+  import { ThemeProvider, CssBaseline } from "ratan-design-origin/primitives";
+
+  const MfeThemeProvider: FC<PropsWithChildren> = (props) => {
+    const [ContainerStore] = ContainerProvider.useContext();
+    const muiTheme = useMemo(() => {
+      const { config } = ThemeConfig(ThemeUtil.getTheme(ContainerStore.theme));
+      return config;
+    }, [ContainerStore.theme]);
+
+    return (
+      <ThemeProvider theme={muiTheme}>
+        <CssBaseline />
+        {props.children}
+      </ThemeProvider>
+    );
+  };
+
+  export default MfeThemeProvider;
+  ```
+</div>
+
+<div className="mui">
+  The `MfeThemeProvider` above is used in <a href="https://bitbucket.global.standardchartered.com/projects/RATANRT/repos/mfe-template-tiles/browse/src/App.tsx?at=trunk" target="_blank">`/src/App.tsx in mfe-template-tiles`</a>.<br/>
+</div>
+<div>
+  <a href="https://bitbucket.global.standardchartered.com/projects/RATANRT/repos/mfe-template-tiles/browse/src/App.tsx?at=trunk" target="_blank">`/src/App.tsx in mfe-template-tiles`</a> File.
+  ``` tsx dark
+  import React from "react";
+  import MfeThemeProvider from "./Root/component/MfeThemeProvider";
+  import Routing from "./Root/routing";
+  import { TileProps } from "./Root/routing/common/interface";
+
+  const App: React.FC<TileProps> = (props: TileProps): React.ReactElement => (
+    <MfeThemeProvider>
+      <Routing {...props} />
+    </MfeThemeProvider>
+  );
+
+  export default App;
+  ```
+</div>

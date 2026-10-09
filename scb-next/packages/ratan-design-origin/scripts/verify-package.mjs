@@ -68,7 +68,8 @@ for (const peer of [
   "@mui/x-date-pickers-pro",
   "@mui/x-data-grid",
   "@mui/base",
-  "dayjs"
+  "dayjs",
+  "@emotion/css"
 ]) {
   await assert.rejects(
     access(join(consumer, "node_modules", peer)),
@@ -214,7 +215,8 @@ npm([
   "@mui/x-date-pickers-pro@6.20.2",
   "dayjs@1.11.21",
   "@mui/x-data-grid@6.20.4",
-  "@mui/base@5.0.0-beta.70"
+  "@mui/base@5.0.0-beta.70",
+  "@emotion/css@11.13.5"
 ]);
 console.log(
   npm(["run", "typecheck", "--", "--project", "tsconfig.dates.json"])
@@ -257,6 +259,21 @@ await build({
   build: { ssr: "src/server-portal.tsx", outDir: "dist-server-portal" }
 });
 execFileSync(process.execPath, [join(consumer, "dist-server-portal/server-portal.js")], {
+  cwd: consumer,
+  stdio: "inherit"
+});
+for (const resolution of ["bundler", "node"]) {
+  console.log(npm(["run", "typecheck", "--", "--project", "tsconfig.compatibility-css.json",
+    "--moduleResolution", resolution]));
+}
+await build({
+  root: consumer,
+  configFile: false,
+  logLevel: "warn",
+  ssr: { noExternal: true },
+  build: { ssr: "src/server-compatibility-css.ts", outDir: "dist-server-compatibility-css" }
+});
+execFileSync(process.execPath, [join(consumer, "dist-server-compatibility-css/server-compatibility-css.js")], {
   cwd: consumer,
   stdio: "inherit"
 });

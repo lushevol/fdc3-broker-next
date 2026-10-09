@@ -14,6 +14,7 @@ const externalPeers = /^(?:react(?:-dom)?(?:\/|$)|@mui\/|@emotion\/|dayjs(?:\/|$
 const webkitDependencies = ['tokens/webkit.js', 'tokens/webkit-theme.generated.js'];
 const dateDependencies = ['date-style.js', 'picker-slot-props.js', 'sx.js'];
 const componentCases = [
+  ['compatibility-css', 'stringCss', ['compatibility-css.js']],
   ['button', 'Button', ['Button.js']],
   ['loading-button', 'LoadingButton', ['LoadingButton.js', 'Button.js', 'loading-button-props.js']],
   ['input', 'Input', ['Input.js', 'input-style.js']],

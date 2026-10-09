@@ -1,0 +1,160 @@
+import { Meta } from '@storybook/blocks';
+
+<Meta title="Getting Started" />
+<style>
+  {`
+    h3 {
+      margin-top: 1.5rem !important;
+    }
+    .mui {
+      margin-top: 1rem;
+      margin-bottom: 1rem;
+      font-weight: 900;
+    }
+  `}
+</style>
+
+# Getting Started
+##
+<h3>This page helps developers to get started and onboard their application into any Micro-frontend Application which adopt <a href="https://single-spa.js.org/docs/getting-started-overview" target="_blank">Single-Spa</a> framework.</h3>
+##
+<br/>
+Browse example stories now by navigating to them in the sidebar.<br/>
+View their code in the <a href="https://bitbucket.global.standardchartered.com/scm/ratanrt/mfe-base.git" target="_blank">`https://bitbucket.global.standardchartered.com/scm/ratanrt/mfe-base.git`</a> repository at <a href="https://bitbucket.global.standardchartered.com/projects/RATANRT/repos/mfe-base/browse/stories?at=trunk" target="_blank">`stories`</a> directory to learn how they work.
+<div className="mui">
+  For Material-UI (MUI) Components, please check this <a href="https://mui.com/material-ui/react-autocomplete/" target="_blank">`page`</a> for more detail and follow the instruction on how to use them out of the box.<br/>
+  We have <a href="https://mui.com/material-ui/getting-started/installation/" target="_blank">`installed`</a> Material-UI (MUI) in <a href="https://bitbucket.global.standardchartered.com/scm/ratanrt/mfe-template-container.git" target="_blank">`mfe-template-container`</a> and <a href="https://bitbucket.global.standardchartered.com/scm/ratanrt/mfe-template-tiles.git" target="_blank">`mfe-template-tiles`</a> repositories.<br/>
+  If you create your project repository follow the <a href="https://confluence.global.standardchartered.com/display/DSP/Development+Principle+-+Development+Guideline+-+Onboarding+Process" target="_blank">`Onboarding Process Document`</a>, then you do not need to install the <a href="https://mui.com/material-ui/react-autocomplete/" target="_blank">`Material-UI (MUI)`</a> again.<br/>
+  You can just imported and use it directly:<br/>
+</div>
+<div>
+  ``` tsx dark
+  import * as React from 'react';
+  import { Stack as Stack } from "ratan-design-origin/primitives";
+  import { Button as Button } from "ratan-design-origin/primitives";
+
+  export default function BasicButtons() {
+    return (
+      <Stack spacing={2} direction="row">
+        <Button variant="text">Text</Button>
+        <Button variant="contained">Contained</Button>
+        <Button variant="outlined">Outlined</Button>
+      </Stack>
+    );
+  }
+  ```
+</div>
+<div className="mui">
+  Custom (Input) Components are using <a href="https://mui.com/material-ui/react-autocomplete/" target="_blank">`Material-UI (MUI)`</a> as based component with some customizations.<br/>
+  They all are shared (exported) from <a href="https://bitbucket.global.standardchartered.com/scm/ratanrt/mfe-base.git" target="_blank">`mfe-base`</a>.<br/>
+  Check this <a href="https://bitbucket.global.standardchartered.com/projects/RATANRT/repos/mfe-base/browse/src/root.tsx?at=refs%2Fheads%2Ftrunk" target="_blank">`root.tsx`</a> in <a href="https://bitbucket.global.standardchartered.com/scm/ratanrt/mfe-base.git" target="_blank">`mfe-base`</a> file for more detail.
+</div>
+<div>
+  ``` tsx dark
+  export * as Provider from "./hooks/provider";
+  export * as Service from "./hooks/service";
+  export * as Reduces from "./hooks/reducer";
+  export * as ActionType from "./hooks/reducer/util/ActionType";
+  export * as Hooks from "./hooks";
+  export * as CommonUtil from "./utils/common";
+  export * as ChannelUtil from "./utils/channel";
+  export * as LoginUtil from "./utils/login";
+  export * as ErrorBoundry from "./components/ErrorBoundry";
+  export * as Loader from "./components/Loader";
+  export * as PageLoader from "./components/Loader/PageLoader";
+  export * as LoaderProps from "./components/Loader/common/type";
+  export * as Drawer from "./components/Drawer";
+  export * as ThemeConfig from "./theme/Config";
+  export * as ThemeUtil from "./theme/config/utils";
+  export * as Splash from "./components/Splash";
+  export * as ReactRouterDom from "react-router-dom";
+  export * as Dispatcher from "./hooks/dispathcer";
+  export * as Time from "./components/Time";
+  export * as LoadingButton from "./components/LoadingButton";
+  export * as LoadingButtonProps from "./components/LoadingButton/interface";
+  export * as Input from "./components/Input";
+  export * as Snackbar from "./components/Snackbar";
+  ```
+</div>
+<div className="mui">
+  To use Custom (Input) Components from <a href="https://bitbucket.global.standardchartered.com/scm/ratanrt/mfe-base.git" target="_blank">`mfe-base`</a>, please check the `/src/Root/import/index.ts` in your project repository.<br/>
+  It should have similar code with <a href="https://bitbucket.global.standardchartered.com/projects/RATANRT/repos/mfe-template-tiles/browse/src/Root/import/index.ts?at=refs%2Fheads%2Ftrunk" target="_blank">`/src/Root/import/index.ts in mfe-template-tiles`</a>.
+  Since it is a Micro-frontend using <a href="https://single-spa.js.org/docs/getting-started-overview" target="_blank">Single-Spa</a> framework, the Application Teams do not need to run `npm install @fm/base`.<br/>
+  The `@fm/base` will be accessed on the fly from server defined in the <a href="https://bitbucket.global.standardchartered.com/projects/RATANRT/repos/mfe-root-config/browse/public/importmap.json?at=refs%2Fheads%2Ftrunk" target="_blank">`importmap.json`</a> file.
+</div>
+<div>
+  ``` tsx dark
+  import * as Container from "@fm/base";
+  export const ErrorBoundry = Container.ErrorBoundry.default;
+  export const Splash = Container.Splash.default;
+  export const Loader = Container.Loader.default;
+  export const LoaderProps = Container.LoaderProps.LoaderProps;
+  export const PageLoader = Container.PageLoader.default;
+  export const Input = Container.Input.default;
+  export const InputProps = Container.Input.InputProps;
+  export const LoadingButton = Container.LoadingButton.default;
+  export const LoadingButtonProps = Container.LoadingButtonProps.LoadingButtonProps;
+  export const ContainerProvider = Container.Provider;
+  export const ReactRouterDom = Container.ReactRouterDom;
+  export const Service = Container.Service;
+  export const Hooks = Container.Hooks;
+  export const CommonUtil = Container.CommonUtil;
+  export const ChannelUtil = Container.ChannelUtil;
+  export const useContainerDispatcher = Container.Dispatcher.default;
+  export const ThemeConfig = Container.ThemeConfig.default;
+  export const ThemeUtil = Container.ThemeUtil;
+  export const Snackbar = Container.Snackbar.default;
+  export const SnackbarProps = Container.Snackbar.SnackbarProps;
+  export default Container;
+  ```
+</div>
+<div className="mui">
+  Then you can use the Custom (Input) Components from `/src/Root/import/index.ts` in your code.<br/>
+  Check this file <a href="https://bitbucket.global.standardchartered.com/projects/RATANRT/repos/mfe-template-tiles/browse/src/Tile1/Main/index.tsx?at=refs%2Fheads%2Ftrunk" target="_blank">`/src/Tile1/Main/index.tsx in mfe-template-tiles`</a> as an example.
+</div>
+<div>
+  ``` tsx dark
+  import React from "react";
+  import useController from "./common/useController";
+  import Root, { classes, PREFIX } from "./common/style";
+  import { ErrorBoundry, CommonUtil, Input, LoadingButton } from "../../Root/import";
+  import Comp1 from "../components/Comp1";
+  import Comp2 from "../components/Comp2";
+  import { MainProps } from "./common/interface";
+  import json from "../../../package.json";
+
+  const App: React.FC<MainProps> = (props: MainProps): React.ReactElement => {
+    const { loading, setLoading } = useController(props);
+
+    return (
+      <ErrorBoundry>
+        <div>
+          <strong>Version:</strong> {json.version}
+          {"  "}
+          <strong>Env:</strong> {CommonUtil.getEnv()}
+        </div>
+        <Root className={classes.root} data-testid={`${PREFIX}`}>
+          <section className={classes.section}>
+            <div>
+              <Input label="label" labelPosition="top" size="medium" />
+            </div>
+            <div>
+              <LoadingButton loading={loading} variant="contained" size="large" onClick={() => setLoading(true)}>Loading button</LoadingButton>
+            </div>
+            <div>
+              <Input label="label" labelPosition="left" size="medium" />
+            </div>
+            <div>
+              <LoadingButton loading={loading} variant="contained" size="large" onClick={() => setLoading(true)}>Loading button</LoadingButton>
+            </div>
+            <Comp1 />
+            <Comp2 />
+          </section>
+        </Root>
+      </ErrorBoundry>
+    );
+  };
+
+  export default App;
+  ```
+</div>

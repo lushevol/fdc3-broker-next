@@ -1,0 +1,77 @@
+import { act, renderHook } from "@testing-library/react";
+import useController from "./useController";
+
+const mockLogout = jest.fn(() => Promise.resolve());
+const mockDispacthIsOnLogout = jest.fn();
+const mockButtonEvent = jest.fn();
+const mockModalEvent = jest.fn();
+const mockGetJWTPayload = jest.fn();
+
+let mockRefreshToken: string | undefined;
+
+jest.mock("../../../hooks/provider", () => ({
+  useContext: () => [{ refreshToken: mockRefreshToken }, jest.fn()],
+}));
+
+jest.mock("../../../hooks/dispathcer", () => () => ({
+  dispacthIsOnLogout: mockDispacthIsOnLogout,
+}));
+
+jest.mock("../../../analytics", () => () => ({
+  ButtonEvent: mockButtonEvent,
+  ModalEvent: mockModalEvent,
+}));
+
+jest.mock("../../../services", () => () => ({ logout: mockLogout }));
+
+jest.mock("../../../hooks/service", () => ({
+  relogin: jest.fn(() => Promise.resolve()),
+}));
+
+jest.mock("../../../utils/common", () => ({
+  getJWTPayload: (...args: unknown[]) => mockGetJWTPayload(...args),
+  waitFor: () => Promise.resolve(),
+}));
+
+describe("Timeout useController", () => {
+  beforeEach(() => {
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date("2026-08-10T00:00:00.000Z"));
+    mockRefreshToken = undefined;
+    jest.clearAllMocks();
+    mockGetJWTPayload.mockReturnValue({
+      exp: (Date.now() + 10_000) / 1000,
+    });
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  it("keeps the prompt open while refresh is pending and arms logout when it arrives", async () => {
+    const setOpen = jest.fn();
+    const { rerender } = renderHook(() => useController({ setOpen }));
+
+    await act(async () => undefined);
+
+    expect(mockLogout).not.toHaveBeenCalled();
+    expect(setOpen).not.toHaveBeenCalledWith(false);
+
+    mockRefreshToken = "Bearer delayed-refresh-token";
+    rerender();
+
+    expect(mockGetJWTPayload).toHaveBeenCalledWith(mockRefreshToken);
+
+    await act(async () => {
+      jest.advanceTimersByTime(7_999);
+    });
+    expect(mockLogout).not.toHaveBeenCalled();
+
+    await act(async () => {
+      jest.advanceTimersByTime(1);
+    });
+
+    expect(mockLogout).toHaveBeenCalledTimes(1);
+    expect(setOpen).toHaveBeenCalledWith(false);
+  });
+});
