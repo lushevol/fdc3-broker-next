@@ -6,10 +6,9 @@ import {
   type RatanAppearance,
 } from './appearance.js';
 import { createRatanTheme, type RatanThemeOptions } from './theme/index.js';
-import { OverlayContainerContext } from './overlay-context.js';
-
-export { OverlayContainerContext } from './overlay-context.js';
-
+export const OverlayContainerContext = /*#__PURE__*/ React.createContext<
+  HTMLElement | null | undefined
+>(undefined);
 const RatanAppearanceContext =
   /*#__PURE__*/ React.createContext<RatanAppearance>(DEFAULT_RATAN_APPEARANCE);
 const Root = /*#__PURE__*/ styled('div')(({ theme }) => ({

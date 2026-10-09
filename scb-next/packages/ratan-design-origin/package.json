@@ -5,7 +5,6 @@
   "description": "Standalone React 18 and MUI 5 controls and SCB design tokens",
   "type": "module",
   "files": [
-    ".agents/skills/ratan-design-origin",
     "dist",
     "README.md",
     "CHANGELOG.md",
@@ -19,96 +18,6 @@
   "types": "./dist/index.d.ts",
   "typesVersions": {
     "*": {
-      "button": [
-        "dist/Button.d.ts"
-      ],
-      "loading-button": [
-        "dist/LoadingButton.d.ts"
-      ],
-      "input": [
-        "dist/Input.d.ts"
-      ],
-      "select": [
-        "dist/Select.d.ts"
-      ],
-      "search-input": [
-        "dist/SearchInput.d.ts"
-      ],
-      "search-button": [
-        "dist/SearchButton.d.ts"
-      ],
-      "reset-button": [
-        "dist/ResetButton.d.ts"
-      ],
-      "search-grid": [
-        "dist/SearchGrid.d.ts"
-      ],
-      "search-condition": [
-        "dist/SearchCondition.d.ts"
-      ],
-      "search-condition-container": [
-        "dist/SearchConditionContainer.d.ts"
-      ],
-      "toggle-button": [
-        "dist/ToggleButton.d.ts"
-      ],
-      "label": [
-        "dist/Label.d.ts"
-      ],
-      "label-menu-item": [
-        "dist/LabelMenuItem.d.ts"
-      ],
-      "loader": [
-        "dist/Loader.d.ts"
-      ],
-      "page-loader": [
-        "dist/PageLoader.d.ts"
-      ],
-      "snackbar": [
-        "dist/Snackbar.d.ts"
-      ],
-      "dialog": [
-        "dist/Dialog.d.ts"
-      ],
-      "empty-state": [
-        "dist/EmptyState.d.ts"
-      ],
-      "error-fallback": [
-        "dist/ErrorFallback.d.ts"
-      ],
-      "loading-overlay": [
-        "dist/LoadingOverlay.d.ts"
-      ],
-      "spinner": [
-        "dist/Spinner.d.ts"
-      ],
-      "builder-button": [
-        "dist/BuilderButton.d.ts"
-      ],
-      "builder-tabs": [
-        "dist/BuilderTabs.d.ts"
-      ],
-      "builder-tab": [
-        "dist/BuilderTab.d.ts"
-      ],
-      "builder-tab-panel": [
-        "dist/BuilderTabPanel.d.ts"
-      ],
-      "date-picker": [
-        "dist/DatePicker.d.ts"
-      ],
-      "date-time-picker": [
-        "dist/DateTimePicker.d.ts"
-      ],
-      "time-picker": [
-        "dist/TimePicker.d.ts"
-      ],
-      "provider": [
-        "dist/Provider.d.ts"
-      ],
-      "appearance": [
-        "dist/appearance.d.ts"
-      ],
       "theme": [
         "dist/theme/index.d.ts"
       ],
@@ -166,126 +75,6 @@
     "./portal-theme": {
       "types": "./dist/portal-theme.d.ts",
       "import": "./dist/portal-theme.js"
-    },
-    "./button": {
-      "types": "./dist/Button.d.ts",
-      "import": "./dist/Button.js"
-    },
-    "./loading-button": {
-      "types": "./dist/LoadingButton.d.ts",
-      "import": "./dist/LoadingButton.js"
-    },
-    "./input": {
-      "types": "./dist/Input.d.ts",
-      "import": "./dist/Input.js"
-    },
-    "./select": {
-      "types": "./dist/Select.d.ts",
-      "import": "./dist/Select.js"
-    },
-    "./search-input": {
-      "types": "./dist/SearchInput.d.ts",
-      "import": "./dist/SearchInput.js"
-    },
-    "./search-button": {
-      "types": "./dist/SearchButton.d.ts",
-      "import": "./dist/SearchButton.js"
-    },
-    "./reset-button": {
-      "types": "./dist/ResetButton.d.ts",
-      "import": "./dist/ResetButton.js"
-    },
-    "./search-grid": {
-      "types": "./dist/SearchGrid.d.ts",
-      "import": "./dist/SearchGrid.js"
-    },
-    "./search-condition": {
-      "types": "./dist/SearchCondition.d.ts",
-      "import": "./dist/SearchCondition.js"
-    },
-    "./search-condition-container": {
-      "types": "./dist/SearchConditionContainer.d.ts",
-      "import": "./dist/SearchConditionContainer.js"
-    },
-    "./toggle-button": {
-      "types": "./dist/ToggleButton.d.ts",
-      "import": "./dist/ToggleButton.js"
-    },
-    "./label": {
-      "types": "./dist/Label.d.ts",
-      "import": "./dist/Label.js"
-    },
-    "./label-menu-item": {
-      "types": "./dist/LabelMenuItem.d.ts",
-      "import": "./dist/LabelMenuItem.js"
-    },
-    "./loader": {
-      "types": "./dist/Loader.d.ts",
-      "import": "./dist/Loader.js"
-    },
-    "./page-loader": {
-      "types": "./dist/PageLoader.d.ts",
-      "import": "./dist/PageLoader.js"
-    },
-    "./snackbar": {
-      "types": "./dist/Snackbar.d.ts",
-      "import": "./dist/Snackbar.js"
-    },
-    "./dialog": {
-      "types": "./dist/Dialog.d.ts",
-      "import": "./dist/Dialog.js"
-    },
-    "./empty-state": {
-      "types": "./dist/EmptyState.d.ts",
-      "import": "./dist/EmptyState.js"
-    },
-    "./error-fallback": {
-      "types": "./dist/ErrorFallback.d.ts",
-      "import": "./dist/ErrorFallback.js"
-    },
-    "./loading-overlay": {
-      "types": "./dist/LoadingOverlay.d.ts",
-      "import": "./dist/LoadingOverlay.js"
-    },
-    "./spinner": {
-      "types": "./dist/Spinner.d.ts",
-      "import": "./dist/Spinner.js"
-    },
-    "./builder-button": {
-      "types": "./dist/BuilderButton.d.ts",
-      "import": "./dist/BuilderButton.js"
-    },
-    "./builder-tabs": {
-      "types": "./dist/BuilderTabs.d.ts",
-      "import": "./dist/BuilderTabs.js"
-    },
-    "./builder-tab": {
-      "types": "./dist/BuilderTab.d.ts",
-      "import": "./dist/BuilderTab.js"
-    },
-    "./builder-tab-panel": {
-      "types": "./dist/BuilderTabPanel.d.ts",
-      "import": "./dist/BuilderTabPanel.js"
-    },
-    "./date-picker": {
-      "types": "./dist/DatePicker.d.ts",
-      "import": "./dist/DatePicker.js"
-    },
-    "./date-time-picker": {
-      "types": "./dist/DateTimePicker.d.ts",
-      "import": "./dist/DateTimePicker.js"
-    },
-    "./time-picker": {
-      "types": "./dist/TimePicker.d.ts",
-      "import": "./dist/TimePicker.js"
-    },
-    "./provider": {
-      "types": "./dist/Provider.d.ts",
-      "import": "./dist/Provider.js"
-    },
-    "./appearance": {
-      "types": "./dist/appearance.d.ts",
-      "import": "./dist/appearance.js"
     }
   },
   "scripts": {
@@ -298,8 +87,7 @@
     "storybook": "storybook dev -p 6019",
     "build:storybook": "storybook build -o storybook-static",
     "tokens:generate": "node scripts/generate-webkit-assets.mjs",
-    "verify:package": "node scripts/verify-package.mjs",
-    "verify:tree-shaking": "node scripts/verify-tree-shaking.mjs"
+    "verify:package": "node scripts/verify-package.mjs"
   },
   "peerDependencies": {
     "react": "^18.2.0",
@@ -321,12 +109,8 @@
     "@mui/x-date-pickers-pro": {
       "optional": true
     },
-    "@mui/x-data-grid": {
-      "optional": true
-    },
-    "@mui/base": {
-      "optional": true
-    },
+    "@mui/x-data-grid": { "optional": true },
+    "@mui/base": { "optional": true },
     "dayjs": {
       "optional": true
     }

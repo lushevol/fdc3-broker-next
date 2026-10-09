@@ -936,49 +936,6 @@ the remaining inventory classification, and release governance remain open.
   changelog and release guidance record the measurement boundary, before/after
   bytes, budget and rollback target.
 
-### Component imports: compilation isolation and unused-code elimination
-
-- Keep all existing root and integration imports compatible. Add explicit
-  lowercase component subpaths, such as `ratan-design-origin/button`, that
-  resolve directly to the component's emitted module and declarations.
-  Each direct module is a library entry so its public runtime exports survive
-  the producer build, including independently imported Builder tab helpers.
-- A direct component import must load only that implementation and its required
-  package dependencies during a consumer build. Independent feedback, Builder
-  and date components must not share implementation modules. Dialog's overlay
-  context must not require loading the provider or theme implementation.
-- An unused package import contributes no rendered package code. A consumer
-  with no package import loads no package modules and emits no package CSS or
-  fonts. CSS remains an explicit side-effectful import; JavaScript modules remain
-  removable. Type-only imports must not load runtime package code.
-- Root named imports remain tree-shakable in the final bundle, but their export
-  barrel may be inspected by bundlers. Direct subpaths provide the stronger
-  compilation-isolation guarantee. Building the distributable library still
-  emits all supported exports; consumer imports determine application inclusion.
-- Verify loaded and rendered package module sets for every direct component
-  against its required dependency graph, using the built package and again the
-  independently installed tarball. Verify empty, unused, type-only, root Button
-  and explicitly imported CSS cases. Keep the existing Button byte budget and
-  behavior/type/SSR/browser checks.
-
-Verification evidence: all 30 direct dependency graphs and the Builder helper
-case pass for the workspace build and installed tarball. Root Button retains
-only `Button.js` at 427 bytes with pinned Vite 8.2.1 and external UI peers;
-the direct Button path also loads only that module, while the previous root
-consumer graph traversed 31 package modules. The tarball's modern/legacy
-declarations, root/direct export identity, DOM-free SSR, explicit CSS/13 fonts
-and all 24 package/catalog browser checks pass. Package coverage is 96.96% lines
-and 94.75% branches (112 tests), plus five token tests. Base/Ratan/Cashflow
-compatibility tests, production builds and dependency isolation pass. Ratan's
-separate typecheck has the existing TS5053 conflict between `--noEmit` and its
-inherited `emitDeclarationOnly`. This host configuration limitation is separate
-from the passing package typecheck and browser gate.
-The committed host journey was also rerun on an isolated current-checkout stack:
-login and New Tile succeed, but Cashflow stops at the already documented
-`Cannot access 'DateFormat' before initialization` business-module error before
-the acceptance row can render. This blocks completion of the integrated
-render/delete assertion; all temporary servers were stopped after verification.
-
 ### RD-022 specification: automated browser quality gates
 
 - A repository-owned command builds the package and Storybook, creates the

@@ -1,10 +1,5 @@
 {
   "extends": "./tsconfig.json",
-  "include": [
-    "src/dates-browser.tsx",
-    "src/dates.tsx",
-    "src/server-dates.tsx",
-    "src/date-subpaths.ts"
-  ],
+  "include": ["src/dates-browser.tsx", "src/dates.tsx", "src/server-dates.tsx"],
   "exclude": []
 }

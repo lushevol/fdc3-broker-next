@@ -188,17 +188,6 @@ execFileSync(process.execPath, [join(consumer, "dist-server/server.js")], {
   cwd: consumer,
   stdio: "inherit"
 });
-await build({
-  root: consumer,
-  configFile: false,
-  logLevel: "warn",
-  ssr: { noExternal: true },
-  build: { ssr: "src/server-subpaths.ts", outDir: "dist-server-subpaths" }
-});
-execFileSync(process.execPath, [join(consumer, "dist-server-subpaths/server-subpaths.js")], {
-  cwd: consumer,
-  stdio: "inherit"
-});
 assert((await readdir(join(installed, "dist/fonts"))).length === 13);
 npm([
   "install",
@@ -260,10 +249,6 @@ execFileSync(process.execPath, [join(consumer, "dist-server-portal/server-portal
   stdio: "inherit"
 });
 console.log(`Independent tarball consumer verified: ${consumer}`);
-execFileSync(process.execPath, [join(root, "scripts/verify-tree-shaking.mjs"), consumer], {
-  cwd: consumer,
-  stdio: "inherit"
-});
 if (process.env.RATAN_DESIGN_CONSUMER_PATH_FILE) {
   await writeFile(process.env.RATAN_DESIGN_CONSUMER_PATH_FILE, consumer);
 }

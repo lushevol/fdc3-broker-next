@@ -6,9 +6,7 @@ layouts, ToggleButton, Label, Loader, PageLoader, Snackbar, explicit theme facto
 tokens. No Base store, auth, router or services are needed.
 
 ```tsx
-import { RatanDesignProvider } from 'ratan-design-origin/provider';
-import { Input } from 'ratan-design-origin/input';
-import { Button } from 'ratan-design-origin/button';
+import { RatanDesignProvider, Input, Button } from 'ratan-design-origin';
 import 'ratan-design-origin/styles.css';
 
 export function PaymentForm() {
@@ -65,49 +63,6 @@ shadow with the same formula and the dark blue token counterpart.
 - `ratan-design-origin/date-range`: optional Pro single-input DateRangePicker.
 - `ratan-design-origin/portal-theme`: opt-in historical portal theme factory,
   extensions, document reset and grid override policy for existing hosts.
-
-### Tree shaking and direct imports
-
-Use a direct component path when the application build should load and compile
-only that component and its required dependencies:
-
-```tsx
-import { Button, type ButtonProps } from 'ratan-design-origin/button';
-import { Dialog, type DialogProps } from 'ratan-design-origin/dialog';
-```
-
-Each path supports named value and type exports from its module. The existing
-root and integration entries remain compatible. Root named imports remove unused
-runtime code from the final production bundle, but the bundler may still traverse
-the root barrel and its reexports. Direct paths avoid that unrelated package
-module traversal. Type-only imports load no runtime code; applications with no
-package import load no package modules.
-
-| Direct paths | Main exports |
-| --- | --- |
-| `/button`, `/loading-button` | `Button`, `LoadingButton` |
-| `/input`, `/select` | `Input`, `Select` |
-| `/search-input`, `/search-button`, `/reset-button` | `SearchInput`, `SearchButton`, `ResetButton` |
-| `/search-grid`, `/search-condition`, `/search-condition-container` | `SearchGrid`, `SearchCondition`, `SearchConditionContainer` |
-| `/toggle-button`, `/label`, `/label-menu-item` | `ToggleButton`, `Label`, `LabelMenuItem` |
-| `/loader`, `/page-loader`, `/spinner`, `/snackbar` | `Loader`, `PageLoader`, `Spinner`, `Snackbar` |
-| `/dialog`, `/empty-state`, `/error-fallback`, `/loading-overlay` | `Dialog`, `EmptyState`, `ErrorFallback`, `LoadingOverlay` |
-| `/builder-button`, `/builder-tabs`, `/builder-tab`, `/builder-tab-panel` | `BuilderButton`, `BuilderTabs`, `BuilderTab`, `BuilderTabPanel` |
-| `/date-picker`, `/date-time-picker`, `/time-picker` | `DatePicker`, `DateTimePicker`, `TimePicker` |
-| `/provider`, `/appearance` | `RatanDesignProvider`, `useRatanAppearance`; appearance defaults/resolution/types |
-
-Prefix each path with `ratan-design-origin`. `builderTabProps` is also exported
-from `/builder-tab`, and `builderEmptyStyle` from `/builder-tabs`. Direct date
-paths still require the host's optional MUI X/Dayjs peers and localization provider.
-The `dates` entry continues to export `LocalizationProvider` and `AdapterDayjs`.
-
-JavaScript imports do not implicitly load CSS or fonts. Import `styles.css` or
-`tokens.css` explicitly when required; those stylesheets are side effects and
-remain in the bundle. Required dependencies, including theme/token modules used
-by a selected component, remain part of its graph. Tree shaking requires an ESM
-consumer builder with unused-code elimination enabled. The package's own library
-build emits all supported modules for distribution, independently of which
-components a later application imports.
 
 ## Public contract matrix
 
@@ -347,26 +302,12 @@ To customize a global token, add a `:root` declaration after the import; no
 }
 ```
 
-## AI migration and usage guidance
-
-The package includes the [ratan-design-origin skill](.agents/skills/ratan-design-origin/SKILL.md)
-for component usage, migration through compatible adapters, and extraction of
-reusable presentation. Its references cover imports/tree shaking, themes/overlays,
-optional dates, host ownership, and validation. It is included in npm tarballs
-and uses packaged documentation/declarations when source-checkout tools are absent.
-For an agent working outside this package, provide the skill's file path explicitly.
-
 ## Development commands
 
 Run `npm test`, `npm run typecheck`, `npm run lint`, `npm run build`, and
 `npm run build:storybook`. `npm run verify:package` packs and installs into a
 temporary independent consumer, checks declarations/assets/SSR/tree shaking,
 and prints its path. Run `npm run dev` in that printed consumer for port 8019.
-After building the package, `npm run verify:tree-shaking` checks all 30 direct
-paths against their required package module graphs, plus no-import, unused root
-import, type-only import, root Button and explicit stylesheet cases. The packed
-consumer verifier runs the same checks with its pinned Vite version and validates
-direct-import declarations in both modern and legacy TypeScript resolution.
 Use `npm run storybook` for appearance controls and component states on 6019.
 From `scb-next`, `npm run test:e2e:design-origin` builds those surfaces and runs
 the required catalog axe scan, consumer accessibility/interaction matrix, and
@@ -390,9 +331,10 @@ cache access for the temporary consumer. No application/backend service is start
 separately. Azure uses `azure-pipelines-design-origin-quality.yml`; an external CI
 template can invoke the same command after `npm ci` and Chromium installation.
 
-The packed tree-shaking gate uses the fixture's exact Vite 8.2.1 and externalizes
-UI peers. A root `Button` import renders only `Button.js`; its direct path also
-loads only `Button.js`. The enforced ceiling is 2,048 uncompressed bytes and the
+The tree-shaking gate uses the fixture's exact Vite 8.2.1 and externalizes React,
+ReactDOM, MUI Material/icons and Emotion. A core `Button` import renders only
+`Button.js`: 427 uncompressed package-code bytes after the RD-021 fix, down from
+the reproduced 21,935-byte baseline. The enforced ceiling is 2,048 bytes and the
 verifier also rejects unrelated component/token markers and rendered modules.
 This measures package code for one import, not framework bytes, gzip transfer size
 or total application savings. Revise the ceiling only with a reviewed Button

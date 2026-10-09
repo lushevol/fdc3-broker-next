@@ -2,13 +2,6 @@
 
 ## 0.1.0 - Local Release Candidate
 
-- Thirty explicit component/provider/appearance subpaths avoid loading unrelated
-  package modules during consumer compilation. Grouped loaders, state surfaces,
-  Builder controls and date pickers now have independent implementations; root
-  exports and integration entries retain their existing contracts. Packed-consumer
-  checks enforce each direct dependency graph, unused/type-only import removal,
-  root Button size and explicit CSS/font retention.
-
 - Opt-in `tokens.css` exposes document-wide CSS variables without a React
   provider, defaulting to WebKit/light with HTML attributes for dark/legacy.
 
